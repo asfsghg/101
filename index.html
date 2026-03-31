@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends Clicker: Fixed & Working</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; 
+            display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; 
+        }
+        .hud { 
+            background: #111; padding: 20px; border-radius: 15px; text-align: center; 
+            margin-bottom: 20px; width: 340px; border: 2px solid #444;
+        }
+        .stats { font-size: 36px; color: #ffd700; font-weight: bold; }
+        .luck-meter { font-size: 14px; color: #aaa; margin-top: 5px; }
+
+        #click-button {
+            width: 170px; height: 170px; border-radius: 50%; border: none;
+            background: radial-gradient(circle, #2ecc71, #27ae60);
+            color: white; font-size: 24px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 8px #145a32, 0 15px 25px rgba(0,0,0,0.5);
+            transition: 0.05s; margin: 20px 0; outline: none;
+        }
+        #click-button:active { transform: translateY(4px); box-shadow: 0 2px #145a32; }
+
+        .shop { text-align: center; margin-bottom: 30px; }
+        .chest-btn { 
+            padding: 15px 30px; background: #e67e22; border: none; color: white; 
+            cursor: pointer; border-radius: 10px; font-size: 18px; font-weight: bold;
+            box-shadow: 0 5px #a04000; transition: 0.3s;
+        }
+        .chest-btn:disabled { background: #333; opacity: 0.5; box-shadow: none; cursor: not-allowed; }
+        #log { margin-top: 15px; color: #00ffcc; font-weight: bold; height: 24px; text-transform: uppercase; }
+
+        .inventory { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; }
+        .card { 
+            width: 170px; background: #181818; border-radius: 12px; border: 3px solid #333; 
+            overflow: hidden; position: relative; animation: pop 0.3s ease-out;
+        }
+        @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .card-img { width: 100%; height: 120px; object-fit: cover; background: #222; }
+        .card-info { padding: 10px; text-align: center; }
+        .card-name { font-size: 13px; font-weight: bold; height: 35px; display: flex; align-items: center; justify-content: center; }
+        .card-mult { font-size: 24px; font-weight: bold; color: #00ffcc; margin: 5px 0; }
+        .card-desc { font-size: 11px; color: #888; height: 45px; line-height: 1.2; display: flex; align-items: center; justify-content: center; }
+        .negative { color: #ff4d4d !important; }
+        
+        .del-btn { width: 100%; padding: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 10px; margin-top: 10px; }
+        .del-free { background: #34495e; color: white; }
+        .del-paid { background: #c0392b; color: white; }
+
+        /* РЕДКОСТИ */
+        .mythic { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.6); animation: mythicPulse 2s infinite; }
+        .legendary { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
+        .epic { border-color: #9b59b6; }
+        .rare { border-color: #3498db; }
+        .common { border-color: #7f8c8d; }
+
+        @keyframes mythicPulse {
+            0% { box-shadow: 0 0 5px #ff00ff; }
+            50% { box-shadow: 0 0 20px #ff00ff; }
+            100% { box-shadow: 0 0 5px #ff00ff; }
+        }
+
+        .floating-amt {
+            position: fixed; pointer-events: none; color: #ffd700; font-weight: bold; 
+            font-size: 28px; animation: fly 0.8s forwards; z-index: 1000;
+        }
+        @keyframes fly { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+    </style>
+</head>
+<body>
+
+    <div class="hud">
+        <div class="stats"><span id="coins">0</span> 💰</div>
+        <div style="color:#00ffcc">Множитель: x<span id="mult">1.00</span></div>
+        <div class="luck-meter" id="luck-status">Загрузка удачи...</div>
+    </div>
+    
+    <button id="click-button">КЛИК!</button>
+
+    <div class="shop">
+        <button class="chest-btn" id="chest-btn" onclick="buyChest()">СУНДУК (50 💰)</button>
+        <div id="log">ПОГНАЛИ!</div>
+    </div>
+
+    <div class="inventory" id="inventory"></div>
+
+    <script>
+        let coins = parseFloat(localStorage.getItem('fcu_evo_v2_coins')) || 0;
+        let characters = JSON.parse(localStorage.getItem('fcu_evo_v2_chars')) || [];
+        let multiplier = 1.0;
+
+        const POOL = [
+            { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Абсолютный жир! Дает безумный буст.", img: "max.png" },
+            { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "Нерф: ШАДОУ ГДЕ ПАЧКА?.", img: "shadow.png" },
+            { name: "Полина Скрипник", rarity: "epic", mult: 5.0, desc: "Высоко.", img: "polina.png" },
+            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Нерф: блочит по рофлу!", img: "karolina.png" },
+            { name: "Рыженко Артём", rarity: "rare", mult: 2.5, desc: "Любитель потыкать.", img: "artyom.png" },
+            { name: "Чумак Мирослав", rarity: "rare", mult: 0.4, desc: "Нерф: притормозил.", img: "miroslav.png" },
+            { name: "Матвей Бруснецов", rarity: "common", mult: 1.2, desc: "Любитель.", img: "matvey.png" },
+            { name: "Скучный Матвей", rarity: "common", mult: 0.8, desc: "Нерф: сосибака", img: "boring.png" },
+            { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "Нерф: ibnə", img: "renat.png" },
+            { name: "Давид Стариченко", rarity: "mythic", mult: 6.0, desc: "Старый-Молодой", img: "david.png" },
+            { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Денег нет, но вы держитесь", img: "nazar.png" }
+        ];
+
+        const coinEl = document.getElementById('coins');
+        const multEl = document.getElementById('mult');
+        const invEl = document.getElementById('inventory');
+        const logEl = document.getElementById('log');
+        const chestBtn = document.getElementById('chest-btn');
+        const luckEl = document.getElementById('luck-status');
+
+        document.getElementById('click-button').onclick = (e) => {
+            const earn = 1 * multiplier;
+            coins += earn;
+            showFloat(e.clientX, e.clientY, earn.toFixed(2));
+            updateUI();
+            save();
+        };
+
+        function getChestPrice() { return 50 + (characters.length * 50); }
+        function getFiringPrice() { return Math.max(150, Math.floor(coins * 0.75)); }
+
+        function calculatePower() {
+            multiplier = characters.reduce((acc, h) => acc * h.mult, 1.0);
+            if (multiplier < 0.01) multiplier = 0.01;
+        }
+
+        function updateUI() {
+            coinEl.innerText = Math.floor(coins);
+            multEl.innerText = multiplier.toFixed(2);
+            
+            const price = getChestPrice();
+            chestBtn.innerText = `КУПИТЬ СУНДУК (${price} 💰)`;
+            chestBtn.disabled = coins < price;
+            
+            const len = characters.length;
+            if (len < 3) luckEl.innerText = "Статус: Новичок (Удача +++)";
+            else if (len < 6) luckEl.innerText = "Статус: Опытный (Удача средняя)";
+            else luckEl.innerText = "Статус: Магнат (Опасно!)";
+
+            renderInv();
+        }
+
+        function buyChest() {
+            const price = getChestPrice();
+            if (coins >= price) {
+                coins -= price;
+                openChest();
+                updateUI();
+            }
+        }
+
+        function openChest() {
+            const teamSize = characters.length;
+            const rand = Math.random() * 100;
+            let rarity;
+
+            if (teamSize < 3) {
+                rarity = rand < 20 ? "common" : rand < 45 ? "rare" : rand < 70 ? "epic" : rand < 92 ? "legendary" : "mythic";
+            } else if (teamSize < 6) {
+                rarity = rand < 50 ? "common" : rand < 75 ? "rare" : rand < 93 ? "epic" : rand < 98 ? "legendary" : "mythic";
+            } else {
+                rarity = rand < 80 ? "common" : rand < 92 ? "rare" : rand < 97 ? "epic" : rand < 99.5 ? "legendary" : "mythic";
+            }
+
+            const available = POOL.filter(h => h.rarity === rarity);
+            let nerfChance = teamSize < 3 ? 0.15 : teamSize < 6 ? 0.40 : 0.65;
+
+            const nerfs = available.filter(h => h.mult < 1);
+            const buffs = available.filter(h => h.mult >= 1);
+
+            let hero;
+            if (nerfs.length > 0 && buffs.length > 0) {
+                hero = Math.random() < nerfChance ? nerfs[Math.floor(Math.random() * nerfs.length)] : buffs[Math.floor(Math.random() * buffs.length)];
+            } else {
+                hero = available[Math.floor(Math.random() * available.length)];
+            }
+
+            characters.push({ ...hero, instanceId: Date.now() + Math.random() });
+            calculatePower();
+            showLog(`Выпал: ${hero.name}!`);
+            save();
+        }
+
+        function removeHero(id, isNerf) {
+            const price = isNerf ? getFiringPrice() : 0;
+            if (coins >= price) {
+                coins -= price;
+                characters = characters.filter(h => h.instanceId !== id);
+                calculatePower();
+                updateUI();
+                save();
+            } else {
+                showLog("МАЛО ДЕНЕГ!");
+            }
+        }
+
+        function renderInv() {
+            const fPrice = getFiringPrice();
+            invEl.innerHTML = characters.map(h => {
+                const isNerf = h.mult < 1;
+                return `
+                    <div class="card ${h.rarity}">
+                        <img src="${h.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=FRIEND'">
+                        <div class="card-info">
+                            <div class="card-name">${h.name}</div>
+                            <div class="card-mult ${isNerf ? 'negative' : ''}">x${h.mult}</div>
+                            <div class="card-desc">${h.desc}</div>
+                            <button class="del-btn ${isNerf ? 'del-paid' : 'del-free'}" 
+                                    onclick="removeHero(${h.instanceId}, ${isNerf})">
+                                ${isNerf ? `УВОЛИТЬ (${fPrice} 💰)` : 'ВЫГНАТЬ (0 💰)'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showLog(m) {
+            logEl.innerText = m;
+            setTimeout(() => { if(logEl.innerText === m) logEl.innerText = "ПОГНАЛИ!"; }, 3000);
+        }
+
+        function showFloat(x, y, t) {
+            const el = document.createElement('div');
+            el.className = 'floating-amt';
+            el.innerText = `+${t}`;
+            el.style.left = x + 'px'; el.style.top = y + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        function save() {
+            localStorage.setItem('fcu_evo_v2_coins', coins);
+            localStorage.setItem('fcu_evo_v2_chars', JSON.stringify(characters));
+        }
+
+        calculatePower();
+        updateUI();
+    </script>
+</body>
+</html>
+</html>
+                    <b>${hero.name}</b><br>
+                    x${hero.mult}<br>
+                    <small>${hero.desc}</small>
+                `;
+                invDisplay.appendChild(card);
+            });
+        }
+
+        function showLog(msg) {
+            logDisplay.innerText = msg;
+            setTimeout(() => { if(logDisplay.innerText === msg) logDisplay.innerText = ""; }, 3000);
+        }
+    </script>
+</body>
+</html>
