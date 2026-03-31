@@ -169,9 +169,17 @@
             const rand = Math.random() * 100;
             let rarity;
 
-            if (teamSize < 3) rarity = rand < 20 ? "common" : rand < 45 ? "rare" : rand < 70 ? "epic" : rand < 92 ? "legendary" : "mythic";
-            else if (teamSize < 6) rarity = rand < 50 ? "common" : rand < 75 ? "rare" : rand < 93 ? "epic" : rand < 98 ? "legendary" : "mythic";
-            else rarity = rand < 80 ? "common" : rand < 92 ? "rare" : rand < 97 ? "epic" : rand < 99.5 ? "legendary" : "mythic";
+            // Измененные шансы: теперь порог для Mythic шире, чем для Legendary
+            if (teamSize < 3) {
+                // Leg: 70-84 (14%), Myth: 84-100 (16%)
+                rarity = rand < 20 ? "common" : rand < 45 ? "rare" : rand < 70 ? "epic" : rand < 84 ? "legendary" : "mythic";
+            } else if (teamSize < 6) {
+                // Leg: 92-95 (3%), Myth: 95-100 (5%)
+                rarity = rand < 50 ? "common" : rand < 75 ? "rare" : rand < 92 ? "epic" : rand < 95 ? "legendary" : "mythic";
+            } else {
+                // Leg: 97-98 (1%), Myth: 98-100 (2%)
+                rarity = rand < 80 ? "common" : rand < 92 ? "rare" : rand < 97 ? "epic" : rand < 98 ? "legendary" : "mythic";
+            }
 
             playSound(rarity);
 
