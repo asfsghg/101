@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends Clicker: EVO V3 FULL + ONLINE + SOUNDS</title>
+    <title>Friends Clicker: EVO V3 FULL + STACKS</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; user-select: none; }
         
@@ -21,7 +21,6 @@
 
         .hud { background: #111; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; width: 340px; border: 2px solid #444; margin-top: 50px; }
         .stats { font-size: 36px; color: #ffd700; font-weight: bold; }
-        .luck-meter { font-size: 14px; color: #aaa; margin-top: 5px; }
         
         #click-button { 
             width: 170px; height: 170px; border-radius: 50%; border: none; 
@@ -35,32 +34,31 @@
 
         .shop { text-align: center; margin-bottom: 30px; }
         .chest-btn { padding: 15px 30px; background: #e67e22; border: none; color: white; cursor: pointer; border-radius: 10px; font-size: 18px; font-weight: bold; box-shadow: 0 5px #a04000; transition: 0.3s; }
-        .chest-btn:disabled { background: #333; opacity: 0.5; box-shadow: none; cursor: not-allowed; }
         
         #log { margin-top: 15px; color: #00ffcc; font-weight: bold; height: 24px; text-transform: uppercase; }
 
-        .inventory { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; }
+        .inventory { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; padding-bottom: 50px; }
         .card { width: 170px; background: #181818; border-radius: 12px; border: 3px solid #333; overflow: hidden; position: relative; animation: pop 0.3s ease-out; }
-        @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
+        /* Счетчик повторок (Папка) */
+        .card-count { position: absolute; top: 5px; right: 5px; background: #f1c40f; color: black; padding: 2px 8px; border-radius: 10px; font-weight: bold; font-size: 12px; z-index: 5; box-shadow: 0 0 5px black; }
+
         .card-img { width: 100%; height: 120px; object-fit: cover; background: #222; }
         .card-info { padding: 10px; text-align: center; }
         .card-name { font-size: 13px; font-weight: bold; height: 35px; display: flex; align-items: center; justify-content: center; }
-        .card-mult { font-size: 24px; font-weight: bold; color: #00ffcc; margin: 5px 0; }
-        .card-desc { font-size: 11px; color: #888; height: 45px; line-height: 1.2; display: flex; align-items: center; justify-content: center; }
+        .card-mult { font-size: 22px; font-weight: bold; color: #00ffcc; margin: 5px 0; }
+        .card-desc { font-size: 10px; color: #888; height: 40px; line-height: 1.1; display: flex; align-items: center; justify-content: center; }
         
         .negative { color: #ff4d4d !important; }
-        .del-btn { width: 100%; padding: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 10px; margin-top: 10px; }
+        .del-btn { width: 100%; padding: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 10px; margin-top: 10px; border-radius: 4px; }
         .del-free { background: #34495e; color: white; }
         .del-paid { background: #c0392b; color: white; }
 
-        .mythic { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.6); animation: mythicPulse 2s infinite; }
-        .legendary { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
+        .mythic { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.4); }
+        .legendary { border-color: #f1c40f; }
         .epic { border-color: #9b59b6; }
         .rare { border-color: #3498db; }
         .common { border-color: #7f8c8d; }
-        
-        @keyframes mythicPulse { 0% { box-shadow: 0 0 5px #ff00ff; } 50% { box-shadow: 0 0 20px #ff00ff; } 100% { box-shadow: 0 0 5px #ff00ff; } }
         
         .floating-amt { position: fixed; pointer-events: none; color: #ffd700; font-weight: bold; font-size: 28px; animation: fly 0.8s forwards; z-index: 1000; }
         @keyframes fly { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
@@ -74,25 +72,23 @@
     <div id="reg-modal" class="modal">
         <div class="modal-content">
             <h2>РЕГИСТРАЦИЯ</h2>
-            <p>Введи свой никнейм:</p>
-            <input type="text" id="nickname-input" placeholder="Твой ник..." maxlength="12">
+            <input type="text" id="nickname-input" placeholder="Никнейм..." maxlength="12">
             <button onclick="register()">ИГРАТЬ</button>
         </div>
     </div>
 
     <div id="lb-modal" class="modal" onclick="toggleLeaderboard()">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h2>ТОП ИГРОКОВ (ONLINE)</h2>
-            <div class="leaderboard-list" id="lb-list">Загрузка...</div>
-            <br>
-            <button onclick="toggleLeaderboard()">ЗАКРЫТЬ</button>
+            <h2>ТОП (ONLINE)</h2>
+            <div class="leaderboard-list" id="lb-list"></div>
+            <br><button onclick="toggleLeaderboard()">ЗАКРЫТЬ</button>
         </div>
     </div>
 
     <div class="hud">
         <div class="stats"><span id="coins">0</span> 💰</div>
-        <div style="color:#00ffcc">Множитель: x<span id="mult">1.00</span></div>
-        <div class="luck-meter" id="luck-status">Загрузка удачи...</div>
+        <div style="color:#00ffcc">Буст: x<span id="mult">1.00</span></div>
+        <div class="luck-meter" id="luck-status">...</div>
     </div>
     
     <button id="click-button">КЛИК!</button>
@@ -108,7 +104,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // --- КОНФИГУРАЦИЯ FIREBASE (ТВОИ СЕРВЕРА) ---
         const firebaseConfig = {
             apiKey: "AIzaSyCBrATV-dAgbzWPI-cfpmdpvWtU1rNLpvs",
             authDomain: "clicker-d5776.firebaseapp.com",
@@ -121,50 +116,40 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
         let currentUser = localStorage.getItem('fcu_current_user') || "";
         let coins = 0;
         let characters = [];
         let multiplier = 1.0;
 
-        // --- ЗВУКИ (ИЗ ТВОЕГО КОДА) ---
         const SOUNDS = { 
-            click: 'click.mp3.mp3', 
-            common: 'common.mp3.mp3', 
-            rare: 'rare.mp3.mp3', 
-            epic: 'epic.mp3.mp3', 
-            legendary: 'legendary.mp3.mp3', 
-            mythic: 'mythic.mp3.mp3' 
+            click: 'click.mp3.mp3', common: 'common.mp3.mp3', rare: 'rare.mp3.mp3', 
+            epic: 'epic.mp3.mp3', legendary: 'legendary.mp3.mp3', mythic: 'mythic.mp3.mp3' 
         };
 
         function playSound(type) { 
-            const audio = new Audio(SOUNDS[type] || SOUNDS.click); 
-            audio.volume = 0.3; 
-            audio.play().catch(e => {}); 
+            new Audio(SOUNDS[type] || SOUNDS.click).play().catch(() => {}); 
         }
 
-        // --- ПУЛ ПЕРСОНАЖЕЙ ---
         const POOL = [
-            { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Абсолютный жир! Дает безумный буст.", img: "max.png" },
-            { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "Нерф: ШАДОУ ГДЕ ПАЧКА?.", img: "shadow.png" },
+            { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Абсолютный жир!", img: "max.png" },
+            { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "ШАДОУ ГДЕ ПАЧКА?", img: "shadow.png" },
             { name: "Полина Скрипник", rarity: "epic", mult: 5.0, desc: "Высоко.", img: "polina.png" },
-            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Нерф: пизда или нормалды?", img: "karolina.png" },
-            { name: "Рыженко Артём", rarity: "rare", mult: 2.5, desc: "Любитель потыкать не только на кнопки.", img: "artyom.png" },
-            { name: "Чумак Мирослав", rarity: "rare", mult: 1.1, desc: "Небольшой бафф: капитал на уровне его роста.", img: "miroslav.png" },
+            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Нерф: нормалды?", img: "karolina.png" },
+            { name: "Рыженко Артём", rarity: "rare", mult: 2.5, desc: "Любитель потыкать.", img: "artyom.png" },
+            { name: "Чумак Мирослав", rarity: "rare", mult: 1.1, desc: "Рост капитала.", img: "miroslav.png" },
             { name: "Матвей Бруснецов", rarity: "common", mult: 1.2, desc: "Бонус.", img: "matvey.png" },
-            { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "Нерф: для баланса", img: "boring.png" },
-            { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "Нерф: ibnə", img: "renat.png" },
+            { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "Для баланса.", img: "boring.png" },
+            { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "Нерф.", img: "renat.png" },
             { name: "Давид Стариченко", rarity: "mythic", mult: 6.0, desc: "Старый-Молодой", img: "david.png" },
-            { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Омайгарыбал бейби", img: "nazar.png" },
-            { name: "Ваня Пироженко", rarity: "legendary", mult: 16.0, desc: "Ваня жирный говноед, делает пистолет", img: "vanya.png" },
-            { name: "Рома ПалаДИЧЬ", rarity: "epic", mult: 3.0, desc: "Кореной житель Палестины", img: "roma.png" },
-            { name: "Романенко ГЛЕБ", rarity: "mythic", mult: 0.3, desc: "ру-инет те-бе иг-р-у", img: "romanenkoGleb.png" }
+            { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Омайгарыбал", img: "nazar.png" },
+            { name: "Ваня Пироженко", rarity: "legendary", mult: 16.0, desc: "Жирный говноед", img: "vanya.png" },
+            { name: "Рома ПалаДИЧЬ", rarity: "epic", mult: 3.0, desc: "Палестина", img: "roma.png" },
+            { name: "Романенко ГЛЕБ", rarity: "mythic", mult: 0.3, desc: "Ру-инет", img: "romanenkoGleb.png" }
         ];
 
-        // --- СИСТЕМА АККАУНТОВ И БАЗЫ ДАННЫХ ---
         function register() {
             const input = document.getElementById('nickname-input').value.trim();
-            if (input.length < 2) return alert("Ник слишком короткий!");
+            if (input.length < 2) return alert("Мало букв!");
             currentUser = input;
             localStorage.setItem('fcu_current_user', currentUser);
             document.getElementById('reg-modal').style.display = 'none';
@@ -174,16 +159,10 @@
         function loadUserData() {
             if (!currentUser) return;
             document.getElementById('user-display').innerText = currentUser;
-            document.getElementById('reg-modal').style.display = 'none';
-            
-            db.ref('players/' + currentUser).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    coins = data.coins || 0;
-                    characters = data.characters || [];
-                } else {
-                    coins = 0;
-                    characters = [];
+            db.ref('players/' + currentUser).once('value', (snap) => {
+                if (snap.exists()) {
+                    coins = snap.val().coins || 0;
+                    characters = snap.val().characters || [];
                 }
                 calculatePower();
                 updateUI();
@@ -193,40 +172,11 @@
         function save() {
             if (!currentUser) return;
             db.ref('players/' + currentUser).set({
-                name: currentUser,
-                coins: Math.floor(coins),
-                characters: characters,
-                lastSeen: Date.now()
+                name: currentUser, coins: Math.floor(coins),
+                characters: characters, lastSeen: Date.now()
             });
         }
 
-        // --- ЛИДЕРБОРД (ONLINE) ---
-        function toggleLeaderboard() {
-            const modal = document.getElementById('lb-modal');
-            const isVisible = modal.style.display === 'flex';
-            modal.style.display = isVisible ? 'none' : 'flex';
-            if (!isVisible) updateLeaderboard();
-        }
-
-        function updateLeaderboard() {
-            const lbList = document.getElementById('lb-list');
-            lbList.innerHTML = "Загрузка...";
-
-            db.ref('players').orderByChild('coins').limitToLast(10).once('value', (snapshot) => {
-                let players = [];
-                snapshot.forEach(child => { players.push(child.val()); });
-                players.sort((a, b) => b.coins - a.coins);
-
-                lbList.innerHTML = players.map((p, i) => `
-                    <div class="lb-item ${p.name === currentUser ? 'me' : ''}">
-                        <span>${i+1}. ${p.name}</span>
-                        <span>${Math.floor(p.coins).toLocaleString()} 💰</span>
-                    </div>
-                `).join('');
-            });
-        }
-
-        // --- ГЕЙМПЛЕЙ ---
         function calculatePower() {
             if (characters.length === 0) multiplier = 1.0;
             else multiplier = characters.reduce((acc, h) => acc * h.mult, 1.0);
@@ -237,22 +187,18 @@
             document.getElementById('coins').innerText = Math.floor(coins);
             document.getElementById('mult').innerText = multiplier.toFixed(2);
             const price = 50 + (characters.length * 50);
-            const btn = document.getElementById('chest-btn');
-            btn.innerText = `КУПИТЬ СУНДУК (${price} 💰)`;
-            btn.disabled = coins < price;
+            document.getElementById('chest-btn').innerText = `СУНДУК (${price} 💰)`;
             
             const len = characters.length;
             const luck = document.getElementById('luck-status');
-            if (len < 3) luck.innerText = "Статус: Новичок (Удача +++)";
-            else if (len < 6) luck.innerText = "Статус: Опытный (Удача средняя)";
-            else luck.innerText = "Статус: Магнат (Опасно!)";
+            luck.innerText = len < 3 ? "Удача: ВЫСОКАЯ" : len < 7 ? "Удача: НОРМА" : "Удача: НИЗКАЯ";
             
             renderInv();
         }
 
         document.getElementById('click-button').onclick = (e) => {
             if(!currentUser) return;
-            playSound('click'); // Звук клика
+            playSound('click');
             const earn = 1 * multiplier;
             coins += earn;
             showFloat(e.clientX, e.clientY, earn.toFixed(1));
@@ -262,44 +208,32 @@
 
         function buyChest() {
             const price = 50 + (characters.length * 50);
-            if (coins >= price) { 
-                coins -= price; 
-                openChest(); 
-                updateUI(); 
-            }
+            if (coins >= price) { coins -= price; openChest(); updateUI(); }
         }
 
         function openChest() {
             const teamSize = characters.length;
             const rand = Math.random() * 100;
             let rarity;
-            
             if (teamSize < 3) rarity = rand < 20 ? "common" : rand < 45 ? "rare" : rand < 70 ? "epic" : rand < 84 ? "legendary" : "mythic";
-            else if (teamSize < 6) rarity = rand < 50 ? "common" : rand < 75 ? "rare" : rand < 92 ? "epic" : rand < 95 ? "legendary" : "mythic";
             else rarity = rand < 80 ? "common" : rand < 92 ? "rare" : rand < 97 ? "epic" : rand < 98 ? "legendary" : "mythic";
 
-            playSound(rarity); // Звук редкости
-
+            playSound(rarity);
             const available = POOL.filter(h => h.rarity === rarity);
-            let nerfChance = teamSize < 3 ? 0.15 : teamSize < 6 ? 0.40 : 0.65;
-            const nerfs = available.filter(h => h.mult < 1);
-            const buffs = available.filter(h => h.mult >= 1);
-            
-            let hero = (nerfs.length > 0 && buffs.length > 0) ? 
-                (Math.random() < nerfChance ? nerfs[Math.floor(Math.random() * nerfs.length)] : buffs[Math.floor(Math.random() * buffs.length)]) 
-                : available[Math.floor(Math.random() * available.length)];
+            let hero = available[Math.floor(Math.random() * available.length)];
             
             characters.push({ ...hero, instanceId: Date.now() + Math.random() });
             calculatePower();
-            showLog(`Выпал: ${hero.name}!`);
+            showLog(`ВЫПАЛ: ${hero.name}!`);
             save();
         }
 
-        function removeHero(id, isNerf) {
-            const price = isNerf ? Math.max(150, Math.floor(coins * 0.75)) : 0;
+        function removeAllOfKind(name, isNerf) {
+            const count = characters.filter(h => h.name === name).length;
+            const price = isNerf ? Math.max(150, Math.floor(coins * 0.7)) : 0;
             if (coins >= price) {
                 coins -= price;
-                characters = characters.filter(h => h.instanceId !== id);
+                characters = characters.filter(h => h.name !== name);
                 playSound('click');
                 calculatePower();
                 updateUI();
@@ -309,42 +243,53 @@
 
         function renderInv() {
             const invEl = document.getElementById('inventory');
-            const fPrice = Math.max(150, Math.floor(coins * 0.75));
-            invEl.innerHTML = characters.map(h => {
+            // ГРУППИРОВКА (ПАПКИ)
+            const groups = {};
+            characters.forEach(h => {
+                if (!groups[h.name]) groups[h.name] = { ...h, count: 0, totalMult: 1 };
+                groups[h.name].count++;
+                groups[h.name].totalMult *= h.mult;
+            });
+
+            invEl.innerHTML = Object.values(groups).map(h => {
                 const isNerf = h.mult < 1;
+                const fPrice = Math.max(150, Math.floor(coins * 0.7));
                 return `
                 <div class="card ${h.rarity}">
-                    <img src="${h.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=FRIEND'">
+                    ${h.count > 1 ? `<div class="card-count">x${h.count}</div>` : ''}
+                    <img src="${h.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=?❓'">
                     <div class="card-info">
                         <div class="card-name">${h.name}</div>
                         <div class="card-mult ${isNerf ? 'negative' : ''}">x${h.mult}</div>
                         <div class="card-desc">${h.desc}</div>
-                        <button class="del-btn ${isNerf ? 'del-paid' : 'del-free'}" onclick="removeHero(${h.instanceId}, ${isNerf})">
-                            ${isNerf ? `УВОЛИТЬ (${fPrice} 💰)` : 'ВЫГНАТЬ'}
+                        <button class="del-btn ${isNerf ? 'del-paid' : 'del-free'}" onclick="removeAllOfKind('${h.name}', ${isNerf})">
+                            ${isNerf ? `УБРАТЬ ВСЕ (${fPrice})` : 'ВЫГНАТЬ'}
                         </button>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        function showLog(m) { 
-            const logEl = document.getElementById('log');
-            logEl.innerText = m; 
-            setTimeout(() => { if(logEl.innerText === m) logEl.innerText = "ПОГНАЛИ!"; }, 3000); 
+        function toggleLeaderboard() {
+            const modal = document.getElementById('lb-modal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            if (modal.style.display === 'flex') {
+                db.ref('players').orderByChild('coins').limitToLast(10).once('value', (s) => {
+                    let p = []; s.forEach(c => p.push(c.val()));
+                    p.sort((a,b) => b.coins - a.coins);
+                    document.getElementById('lb-list').innerHTML = p.map((x,i) => `<div class="lb-item ${x.name===currentUser?'me':''}"><span>${i+1}. ${x.name}</span><span>${x.coins}</span></div>`).join('');
+                });
+            }
         }
 
-        function showFloat(x, y, t) {
-            const el = document.createElement('div');
-            el.className = 'floating-amt'; el.innerText = `+${t}`;
-            el.style.left = x + 'px'; el.style.top = y + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
+        function showLog(m) { document.getElementById('log').innerText = m; }
+        function showFloat(x,y,t) {
+            const e = document.createElement('div'); e.className = 'floating-amt'; e.innerText = `+${t}`;
+            e.style.left = x+'px'; e.style.top = y+'px'; document.body.appendChild(e);
+            setTimeout(() => e.remove(), 800);
         }
 
-        window.onload = () => {
-            if (currentUser) loadUserData();
-            else document.getElementById('reg-modal').style.display = 'flex';
-        };
+        window.onload = () => currentUser ? loadUserData() : document.getElementById('reg-modal').style.display='flex';
     </script>
 </body>
 </html>
