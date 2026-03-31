@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends Clicker: EVO V3 FULL + STACKS</title>
+    <title>Friends Clicker: EVO V3 FULL + FIXED ONLINE</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; user-select: none; }
         
@@ -11,12 +11,12 @@
         #leaderboard-btn { position: fixed; top: 10px; right: 10px; background: #f1c40f; color: black; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; z-index: 100; }
         
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 10000; }
-        .modal-content { background: #181818; padding: 30px; border-radius: 20px; border: 2px solid #444; text-align: center; width: 300px; }
+        .modal-content { background: #181818; padding: 30px; border-radius: 20px; border: 2px solid #444; text-align: center; width: 320px; }
         .modal input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 8px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; }
         .modal button { background: #2ecc71; border: none; padding: 10px 20px; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; }
 
         .leaderboard-list { text-align: left; margin-top: 15px; max-height: 300px; overflow-y: auto; }
-        .lb-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; }
+        .lb-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; font-size: 14px; }
         .lb-item.me { color: #f1c40f; font-weight: bold; background: rgba(241, 196, 15, 0.1); }
 
         .hud { background: #111; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; width: 340px; border: 2px solid #444; margin-top: 50px; }
@@ -28,7 +28,6 @@
             color: white; font-size: 24px; font-weight: bold; cursor: pointer; 
             box-shadow: 0 8px #145a32, 0 15px 25px rgba(0,0,0,0.5); 
             transition: 0.05s; margin: 20px 0; outline: none; 
-            -webkit-tap-highlight-color: transparent; 
         }
         #click-button:active { transform: translateY(4px); box-shadow: 0 2px #145a32; }
 
@@ -40,7 +39,6 @@
         .inventory { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; padding-bottom: 50px; }
         .card { width: 170px; background: #181818; border-radius: 12px; border: 3px solid #333; overflow: hidden; position: relative; animation: pop 0.3s ease-out; }
         
-        /* Счетчик повторок (Папка) */
         .card-count { position: absolute; top: 5px; right: 5px; background: #f1c40f; color: black; padding: 2px 8px; border-radius: 10px; font-weight: bold; font-size: 12px; z-index: 5; box-shadow: 0 0 5px black; }
 
         .card-img { width: 100%; height: 120px; object-fit: cover; background: #222; }
@@ -79,16 +77,16 @@
 
     <div id="lb-modal" class="modal" onclick="toggleLeaderboard()">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h2>ТОП (ONLINE)</h2>
-            <div class="leaderboard-list" id="lb-list"></div>
-            <br><button onclick="toggleLeaderboard()">ЗАКРЫТЬ</button>
+            <h2>ТОП 10 (ОНЛАЙН)</h2>
+            <div class="leaderboard-list" id="lb-list">Загрузка...</div>
+            <br><button onclick="toggleLeaderboard()" style="background:#444">ЗАКРЫТЬ</button>
         </div>
     </div>
 
     <div class="hud">
         <div class="stats"><span id="coins">0</span> 💰</div>
         <div style="color:#00ffcc">Буст: x<span id="mult">1.00</span></div>
-        <div class="luck-meter" id="luck-status">...</div>
+        <div id="luck-status" style="font-size:12px; color:#666; margin-top:5px;">Удача: Вычисляется...</div>
     </div>
     
     <button id="click-button">КЛИК!</button>
@@ -142,14 +140,14 @@
             { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "Нерф.", img: "renat.png" },
             { name: "Давид Стариченко", rarity: "mythic", mult: 6.0, desc: "Старый-Молодой", img: "david.png" },
             { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Омайгарыбал", img: "nazar.png" },
-            { name: "Ваня Пироженко", rarity: "legendary", mult: 16.0, desc: "Жирный говноед", img: "vanya.png" },
+            { name: "Ваня Пироженко", rarity: "legendary", mult: 16.0, desc: "Ваня жирный говноед", img: "vanya.png" },
             { name: "Рома ПалаДИЧЬ", rarity: "epic", mult: 3.0, desc: "Палестина", img: "roma.png" },
             { name: "Романенко ГЛЕБ", rarity: "mythic", mult: 0.3, desc: "Ру-инет", img: "romanenkoGleb.png" }
         ];
 
         function register() {
             const input = document.getElementById('nickname-input').value.trim();
-            if (input.length < 2) return alert("Мало букв!");
+            if (input.length < 2) return alert("Ник от 2 символов!");
             currentUser = input;
             localStorage.setItem('fcu_current_user', currentUser);
             document.getElementById('reg-modal').style.display = 'none';
@@ -159,10 +157,13 @@
         function loadUserData() {
             if (!currentUser) return;
             document.getElementById('user-display').innerText = currentUser;
+            document.getElementById('reg-modal').style.display = 'none';
+            
             db.ref('players/' + currentUser).once('value', (snap) => {
                 if (snap.exists()) {
-                    coins = snap.val().coins || 0;
-                    characters = snap.val().characters || [];
+                    const data = snap.val();
+                    coins = data.coins || 0;
+                    characters = data.characters || [];
                 }
                 calculatePower();
                 updateUI();
@@ -171,15 +172,39 @@
 
         function save() {
             if (!currentUser) return;
-            db.ref('players/' + currentUser).set({
-                name: currentUser, coins: Math.floor(coins),
-                characters: characters, lastSeen: Date.now()
+            db.ref('players/' + currentUser).update({
+                name: currentUser,
+                coins: Math.floor(coins),
+                characters: characters,
+                lastSeen: Date.now()
+            });
+        }
+
+        function toggleLeaderboard() {
+            const modal = document.getElementById('lb-modal');
+            const isVisible = modal.style.display === 'flex';
+            modal.style.display = isVisible ? 'none' : 'flex';
+            if (!isVisible) updateLeaderboard();
+        }
+
+        function updateLeaderboard() {
+            const listEl = document.getElementById('lb-list');
+            listEl.innerHTML = "Загрузка...";
+            db.ref('players').orderByChild('coins').limitToLast(10).once('value', (snap) => {
+                let players = [];
+                snap.forEach(c => { players.push(c.val()); });
+                players.sort((a,b) => b.coins - a.coins);
+                listEl.innerHTML = players.map((p, i) => `
+                    <div class="lb-item ${p.name === currentUser ? 'me' : ''}">
+                        <span>${i+1}. ${p.name}</span>
+                        <span>${Math.floor(p.coins).toLocaleString()} 💰</span>
+                    </div>
+                `).join('');
             });
         }
 
         function calculatePower() {
-            if (characters.length === 0) multiplier = 1.0;
-            else multiplier = characters.reduce((acc, h) => acc * h.mult, 1.0);
+            multiplier = characters.length === 0 ? 1.0 : characters.reduce((acc, h) => acc * h.mult, 1.0);
             if (multiplier < 0.01) multiplier = 0.01;
         }
 
@@ -187,12 +212,12 @@
             document.getElementById('coins').innerText = Math.floor(coins);
             document.getElementById('mult').innerText = multiplier.toFixed(2);
             const price = 50 + (characters.length * 50);
-            document.getElementById('chest-btn').innerText = `СУНДУК (${price} 💰)`;
+            const btn = document.getElementById('chest-btn');
+            btn.innerText = `СУНДУК (${price} 💰)`;
+            btn.disabled = coins < price;
             
-            const len = characters.length;
             const luck = document.getElementById('luck-status');
-            luck.innerText = len < 3 ? "Удача: ВЫСОКАЯ" : len < 7 ? "Удача: НОРМА" : "Удача: НИЗКАЯ";
-            
+            luck.innerText = characters.length < 3 ? "Статус: Новичок (Удача +++)" : characters.length < 7 ? "Статус: Опытный" : "Статус: Магнат (Опасно)";
             renderInv();
         }
 
@@ -208,7 +233,11 @@
 
         function buyChest() {
             const price = 50 + (characters.length * 50);
-            if (coins >= price) { coins -= price; openChest(); updateUI(); }
+            if (coins >= price) { 
+                coins -= price; 
+                openChest(); 
+                updateUI(); 
+            }
         }
 
         function openChest() {
@@ -229,8 +258,7 @@
         }
 
         function removeAllOfKind(name, isNerf) {
-            const count = characters.filter(h => h.name === name).length;
-            const price = isNerf ? Math.max(150, Math.floor(coins * 0.7)) : 0;
+            const price = isNerf ? Math.max(150, Math.floor(coins * 0.75)) : 0;
             if (coins >= price) {
                 coins -= price;
                 characters = characters.filter(h => h.name !== name);
@@ -243,21 +271,19 @@
 
         function renderInv() {
             const invEl = document.getElementById('inventory');
-            // ГРУППИРОВКА (ПАПКИ)
             const groups = {};
             characters.forEach(h => {
-                if (!groups[h.name]) groups[h.name] = { ...h, count: 0, totalMult: 1 };
+                if (!groups[h.name]) groups[h.name] = { ...h, count: 0 };
                 groups[h.name].count++;
-                groups[h.name].totalMult *= h.mult;
             });
 
             invEl.innerHTML = Object.values(groups).map(h => {
                 const isNerf = h.mult < 1;
-                const fPrice = Math.max(150, Math.floor(coins * 0.7));
+                const fPrice = Math.max(150, Math.floor(coins * 0.75));
                 return `
                 <div class="card ${h.rarity}">
                     ${h.count > 1 ? `<div class="card-count">x${h.count}</div>` : ''}
-                    <img src="${h.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=?❓'">
+                    <img src="${h.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=FRIEND'">
                     <div class="card-info">
                         <div class="card-name">${h.name}</div>
                         <div class="card-mult ${isNerf ? 'negative' : ''}">x${h.mult}</div>
@@ -270,19 +296,12 @@
             }).join('');
         }
 
-        function toggleLeaderboard() {
-            const modal = document.getElementById('lb-modal');
-            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-            if (modal.style.display === 'flex') {
-                db.ref('players').orderByChild('coins').limitToLast(10).once('value', (s) => {
-                    let p = []; s.forEach(c => p.push(c.val()));
-                    p.sort((a,b) => b.coins - a.coins);
-                    document.getElementById('lb-list').innerHTML = p.map((x,i) => `<div class="lb-item ${x.name===currentUser?'me':''}"><span>${i+1}. ${x.name}</span><span>${x.coins}</span></div>`).join('');
-                });
-            }
+        function showLog(m) { 
+            const logEl = document.getElementById('log');
+            logEl.innerText = m; 
+            setTimeout(() => { if(logEl.innerText === m) logEl.innerText = "ПОГНАЛИ!"; }, 3000);
         }
 
-        function showLog(m) { document.getElementById('log').innerText = m; }
         function showFloat(x,y,t) {
             const e = document.createElement('div'); e.className = 'floating-amt'; e.innerText = `+${t}`;
             e.style.left = x+'px'; e.style.top = y+'px'; document.body.appendChild(e);
