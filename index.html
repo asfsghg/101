@@ -3,31 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends Clicker: Local Files Edition</title>
+    <title>Friends Clicker: FIX EDITION</title>
     <style>
-        /* Основной стиль */
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; user-select: none; }
         .hud { background: #111; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; width: 340px; border: 2px solid #444; }
         .stats { font-size: 36px; color: #ffd700; font-weight: bold; }
-        
-        /* Кнопка клика */
-        #click-button { 
-            width: 170px; height: 170px; border-radius: 50%; border: none; 
-            background: radial-gradient(circle, #2ecc71, #27ae60); 
-            color: white; font-size: 24px; font-weight: bold; cursor: pointer; 
-            box-shadow: 0 8px #145a32, 0 15px 25px rgba(0,0,0,0.5); 
-            transition: 0.05s; margin: 20px 0; outline: none; 
-            -webkit-tap-highlight-color: transparent; 
-        }
+        #click-button { width: 170px; height: 170px; border-radius: 50%; border: none; background: radial-gradient(circle, #2ecc71, #27ae60); color: white; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 8px #145a32, 0 15px 25px rgba(0,0,0,0.5); transition: 0.05s; margin: 20px 0; outline: none; -webkit-tap-highlight-color: transparent; }
         #click-button:active { transform: translateY(4px); box-shadow: 0 2px #145a32; }
-
-        /* Магазин и сундуки */
         .shop { text-align: center; margin-bottom: 30px; }
         .chest-btn { padding: 15px 30px; background: #e67e22; border: none; color: white; cursor: pointer; border-radius: 10px; font-size: 18px; font-weight: bold; box-shadow: 0 5px #a04000; transition: 0.3s; }
         .chest-btn:disabled { background: #333; opacity: 0.5; box-shadow: none; cursor: not-allowed; }
         #log { margin-top: 15px; color: #00ffcc; font-weight: bold; height: 24px; text-transform: uppercase; }
-
-        /* Инвентарь и карточки */
         .inventory { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; }
         .card { width: 170px; background: #181818; border-radius: 12px; border: 3px solid #333; overflow: hidden; position: relative; animation: pop 0.3s ease-out; }
         @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -36,19 +22,12 @@
         .card-name { font-size: 13px; font-weight: bold; height: 35px; display: flex; align-items: center; justify-content: center; }
         .card-mult { font-size: 24px; font-weight: bold; color: #00ffcc; margin: 5px 0; }
         .negative { color: #ff4d4d !important; }
-        
-        .del-btn { width: 100%; padding: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 10px; margin-top: 10px; background: #34495e; color: white; }
-
-        /* Редкости */
-        .mythic { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.6); animation: mythicPulse 2s infinite; }
+        .del-btn { width: 100%; padding: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 10px; margin-top: 10px; }
+        .del-free { background: #34495e; color: white; }
+        .del-paid { background: #c0392b; color: white; }
+        .mythic { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.6); }
         .legendary { border-color: #f1c40f; }
-        .epic { border-color: #9b59b6; }
-        .rare { border-color: #3498db; }
-        .common { border-color: #7f8c8d; }
-        @keyframes mythicPulse { 0% { box-shadow: 0 0 5px #ff00ff; } 50% { box-shadow: 0 0 20px #ff00ff; } 100% { box-shadow: 0 0 5px #ff00ff; } }
-
-        /* Вылетающие цифры */
-        .floating-amt { position: fixed; pointer-events: none; color: #ffd700; font-weight: bold; font-size: 28px; animation: fly 0.8s forwards; z-index: 1000; }
+        .floating-amt { position: fixed; pointer-events: none; color: #ffd700; font-weight: bold; font-size: 28px; animation: fly 0.8s forwards; }
         @keyframes fly { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
     </style>
 </head>
@@ -57,7 +36,6 @@
     <div class="hud">
         <div class="stats"><span id="coins">0</span> 💰</div>
         <div style="color:#00ffcc">Множитель: x<span id="mult">1.00</span></div>
-        <div style="font-size: 12px; color: #666; margin-top: 5px;">Файлы должны быть в папке с игрой</div>
     </div>
     
     <button id="click-button">КЛИК!</button>
@@ -70,28 +48,16 @@
     <div class="inventory" id="inventory"></div>
 
     <script>
-        // --- 1. НАСТРОЙКА ЗВУКОВ ---
-        // Работает так же, как картинки: просто указываем имя файла
         const SOUND_FILES = {
-            click: 'click.mp3',
-            common: 'common.mp3',
-            rare: 'rare.mp3',
-            epic: 'epic.mp3',
-            mythic: 'mythic.mp3'
+            click: 'click.mp3', common: 'common.mp3', rare: 'rare.mp3', epic: 'epic.mp3', mythic: 'mythic.mp3'
         };
 
         function playSound(type) {
-            const fileName = SOUND_FILES[type] || SOUND_FILES.click;
-            const audio = new Audio(fileName);
-            audio.volume = 0.4;
-            
-            // Запуск звука
-            audio.play().catch(err => {
-                console.log("Звук не найден или заблокирован: " + fileName);
-            });
+            const audio = new Audio(SOUND_FILES[type] || SOUND_FILES.click);
+            audio.volume = 0.3;
+            audio.play().catch(() => console.log("Нужен клик по экрану для звука"));
         }
 
-        // --- 2. ДАННЫЕ ИГРЫ ---
         const POOL = [
             { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Жир!", img: "max.png" },
             { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "ШАДОУ?", img: "shadow.png" },
@@ -102,37 +68,28 @@
             { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Омайгад.", img: "nazar.png" }
         ];
 
-        let coins = parseFloat(localStorage.getItem('fcu_local_coins')) || 0;
-        let characters = JSON.parse(localStorage.getItem('fcu_local_chars')) || [];
+        // ВОЗВРАЩАЕМ СТАРЫЕ КЛЮЧИ СОХРАНЕНИЯ
+        let coins = parseFloat(localStorage.getItem('fcu_evo_v2_coins')) || 0;
+        let characters = JSON.parse(localStorage.getItem('fcu_evo_v2_chars')) || [];
         let multiplier = 1.0;
 
-        const coinEl = document.getElementById('coins');
-        const multEl = document.getElementById('mult');
-        const invEl = document.getElementById('inventory');
-        const logEl = document.getElementById('log');
-
-        // Клик
-        document.getElementById('click-button').onclick = (e) => {
-            playSound('click');
-            const earn = 1 * multiplier;
-            coins += earn;
-            showFloat(e.clientX, e.clientY, earn.toFixed(2));
-            updateUI();
-            save();
-        };
+        function save() {
+            localStorage.setItem('fcu_evo_v2_coins', coins);
+            localStorage.setItem('fcu_evo_v2_chars', JSON.stringify(characters));
+        }
 
         function calculatePower() {
-            if (characters.length === 0) multiplier = 1.0;
-            else multiplier = characters.reduce((acc, h) => acc * h.mult, 1.0);
+            multiplier = characters.length === 0 ? 1.0 : characters.reduce((acc, h) => acc * h.mult, 1.0);
             if (multiplier < 0.01) multiplier = 0.01;
         }
 
         function updateUI() {
-            coinEl.innerText = Math.floor(coins);
-            multEl.innerText = multiplier.toFixed(2);
+            document.getElementById('coins').innerText = Math.floor(coins);
+            document.getElementById('mult').innerText = multiplier.toFixed(2);
             const price = 50 + (characters.length * 50);
-            document.getElementById('chest-btn').innerText = `СУНДУК (${price} 💰)`;
-            document.getElementById('chest-btn').disabled = coins < price;
+            const chestBtn = document.getElementById('chest-btn');
+            chestBtn.innerText = `СУНДУК (${price} 💰)`;
+            chestBtn.disabled = coins < price;
             renderInv();
         }
 
@@ -148,51 +105,60 @@
         function openChest() {
             const rand = Math.random() * 100;
             let rarity = rand < 50 ? "common" : rand < 75 ? "rare" : rand < 90 ? "epic" : rand < 98 ? "legendary" : "mythic";
-
-            playSound(rarity); // Звук по редкости
-
+            playSound(rarity);
             const available = POOL.filter(h => h.rarity === rarity);
             const hero = available[Math.floor(Math.random() * available.length)];
-
             characters.push({ ...hero, instanceId: Date.now() + Math.random() });
             calculatePower();
-            showLog(`Выпал: ${hero.name}!`);
             save();
         }
 
-        function removeHero(id) {
-            characters = characters.filter(h => h.instanceId !== id);
-            playSound('click');
-            calculatePower();
-            updateUI();
-            save();
+        function removeHero(id, isNerf) {
+            const price = isNerf ? Math.max(150, Math.floor(coins * 0.75)) : 0;
+            if (coins >= price) {
+                coins -= price;
+                characters = characters.filter(h => h.instanceId !== id);
+                playSound('click');
+                calculatePower();
+                updateUI();
+                save();
+            } else {
+                showLog("МАЛО ДЕНЕГ!");
+            }
         }
 
         function renderInv() {
-            invEl.innerHTML = characters.map(h => `
+            const fPrice = Math.max(150, Math.floor(coins * 0.75));
+            document.getElementById('inventory').innerHTML = characters.map(h => {
+                const isNerf = h.mult < 1;
+                return `
                 <div class="card ${h.rarity}">
                     <img src="${h.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=FRIEND'">
                     <div class="card-info">
                         <div class="card-name">${h.name}</div>
-                        <div class="card-mult ${h.mult < 1 ? 'negative' : ''}">x${h.mult}</div>
-                        <button class="del-btn" onclick="removeHero(${h.instanceId})">УБРАТЬ</button>
+                        <div class="card-mult ${isNerf ? 'negative' : ''}">x${h.mult}</div>
+                        <button class="del-btn ${isNerf ? 'del-paid' : 'del-free'}" onclick="removeHero(${h.instanceId}, ${isNerf})">
+                            ${isNerf ? `УВОЛИТЬ (${fPrice} 💰)` : 'ВЫГНАТЬ'}
+                        </button>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         }
 
-        function showLog(m) { logEl.innerText = m; setTimeout(() => { if(logEl.innerText === m) logEl.innerText = "ПОГНАЛИ!"; }, 3000); }
-        
-        function showFloat(x, y, t) {
-            const el = document.createElement('div');
-            el.className = 'floating-amt'; el.innerText = `+${t}`;
-            el.style.left = x + 'px'; el.style.top = y + 'px';
-            document.body.appendChild(el);
+        document.getElementById('click-button').onclick = (e) => {
+            playSound('click');
+            const earn = 1 * multiplier;
+            coins += earn;
+            showFloat(e.clientX, e.clientY, earn.toFixed(2));
+            updateUI();
+            save();
+        };
+
+        function showLog(m) { document.getElementById('log').innerText = m; setTimeout(() => { document.getElementById('log').innerText = "ПОГНАЛИ!"; }, 2000); }
+        function showFloat(x,y,t) {
+            const el = document.createElement('div'); el.className = 'floating-amt'; el.innerText = `+${t}`;
+            el.style.left = x+'px'; el.style.top = y+'px'; document.body.appendChild(el);
             setTimeout(() => el.remove(), 800);
-        }
-
-        function save() {
-            localStorage.setItem('fcu_local_coins', coins);
-            localStorage.setItem('fcu_local_chars', JSON.stringify(characters));
         }
 
         calculatePower();
