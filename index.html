@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Friends Clicker: EVO V3.5 CHESTS</title>
+    <title>Friends Clicker: EVO V3.5 + SOUNDS</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; user-select: none; touch-action: manipulation; }
         
@@ -31,14 +31,12 @@
         }
         #click-button:active { transform: translateY(4px); box-shadow: 0 2px #145a32; }
 
-        /* МАГАЗИН ЯЩИКОВ */
         .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 360px; margin-bottom: 20px; }
         .chest-card { background: #1a1a1a; border: 2px solid #333; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; transition: 0.2s; }
         .chest-card button { width: 100%; padding: 8px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 5px; color: white; }
         .chest-card:disabled { opacity: 0.5; filter: grayscale(1); }
         .chest-title { font-size: 11px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
 
-        /* Цвета ящиков */
         .c-worst { border-color: #4d2a00; } .c-worst button { background: #633900; }
         .c-cheap { border-color: #7f8c8d; } .c-cheap button { background: #95a5a6; }
         .c-mid { border-color: #2980b9; } .c-mid button { background: #3498db; }
@@ -102,8 +100,7 @@
 
     <div id="log">УДАЧНОЙ ОХОТЫ!</div>
 
-    <div class="shop-grid" id="shop-grid">
-        </div>
+    <div class="shop-grid" id="shop-grid"></div>
 
     <div class="inventory" id="inventory"></div>
 
@@ -128,6 +125,16 @@
         let characters = [];
         let multiplier = 1.0;
 
+        // ЗВУКИ ВЕРНУЛИСЬ
+        const SOUNDS = { 
+            click: 'click.mp3.mp3', common: 'common.mp3.mp3', rare: 'rare.mp3.mp3', 
+            epic: 'epic.mp3.mp3', legendary: 'legendary.mp3.mp3', mythic: 'mythic.mp3.mp3' 
+        };
+
+        function playSound(type) { 
+            new Audio(SOUNDS[type] || SOUNDS.click).play().catch(() => {}); 
+        }
+
         const POOL = [
             { name: "Максим Романенко", rarity: "legendary", mult: 1.5, desc: "Жир", img: "max.png" },
             { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "НЕРФ", img: "shadow.png" },
@@ -145,9 +152,8 @@
             { name: "Арсений Москалець", rarity: "mythic", mult: 1.6, desc: "Пузата", img: "Arseniy.png" }
         ];
 
-        // КОНФИГУРАЦИЯ ЯЩИКОВ
         const CHESTS = [
-            { id: 'worst', name: 'Ужасный', basePrice: 20, class: 'c-worst', luck: [80, 15, 4, 1, 0] }, // Много коммонок/нерфов
+            { id: 'worst', name: 'Ужасный', basePrice: 20, class: 'c-worst', luck: [80, 15, 4, 1, 0] },
             { id: 'cheap', name: 'Дешевый', basePrice: 60, class: 'c-cheap', luck: [60, 30, 8, 2, 0] },
             { id: 'mid', name: 'Средний', basePrice: 150, class: 'c-mid', luck: [40, 40, 15, 4, 1] },
             { id: 'good', name: 'Хороший', basePrice: 500, class: 'c-good', luck: [20, 40, 30, 8, 2] },
@@ -167,7 +173,6 @@
         function loadUserData() {
             if (!currentUser) return;
             document.getElementById('user-display').innerText = currentUser;
-            document.getElementById('reg-modal').style.display = 'none';
             db.ref('players/' + currentUser).once('value', (snap) => {
                 if (snap.exists()) {
                     const data = snap.val();
@@ -195,8 +200,6 @@
         function updateUI() {
             document.getElementById('coins').innerText = Math.floor(coins).toLocaleString();
             document.getElementById('mult').innerText = multiplier.toFixed(2);
-            
-            // Обновление кнопок магазина
             const shop = document.getElementById('shop-grid');
             shop.innerHTML = CHESTS.map(c => {
                 const currentPrice = Math.floor(c.basePrice + (characters.length * (c.basePrice * 0.5)));
@@ -210,14 +213,13 @@
                     </div>
                 `;
             }).join('');
-
             renderInv();
         }
 
-        // КЛИК (iOS FIXED)
         document.getElementById('click-button').onpointerdown = (e) => {
             if(!currentUser) return;
             e.preventDefault(); 
+            playSound('click'); // Звук клика
             const earn = 1 * multiplier;
             coins += earn;
             const posX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
@@ -239,14 +241,13 @@
         function openChest(luckArray) {
             const rand = Math.random() * 100;
             let rarity;
-            
-            // luckArray = [Common%, Rare%, Epic%, Leg%, Mythic%]
             if (rand < luckArray[0]) rarity = "common";
             else if (rand < luckArray[0] + luckArray[1]) rarity = "rare";
             else if (rand < luckArray[0] + luckArray[1] + luckArray[2]) rarity = "epic";
             else if (rand < luckArray[0] + luckArray[1] + luckArray[2] + luckArray[3]) rarity = "legendary";
             else rarity = "mythic";
 
+            playSound(rarity); // Звук редкости
             const available = POOL.filter(h => h.rarity === rarity);
             const hero = available[Math.floor(Math.random() * available.length)];
             
@@ -260,6 +261,7 @@
             const price = isNerf ? Math.max(100, Math.floor(coins * 0.5)) : 0;
             if (coins >= price) {
                 coins -= price;
+                playSound('click'); // Звук удаления
                 characters = characters.filter(h => h.name !== name);
                 calculatePower();
                 updateUI();
@@ -298,7 +300,6 @@
             const isVisible = modal.style.display === 'flex';
             modal.style.display = isVisible ? 'none' : 'flex';
             if (!isVisible) {
-                document.getElementById('lb-list').innerHTML = "Загрузка...";
                 db.ref('players').orderByChild('coins').limitToLast(10).once('value', (snap) => {
                     let players = [];
                     snap.forEach(c => { players.push(c.val()); });
