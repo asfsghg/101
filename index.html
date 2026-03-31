@@ -78,6 +78,7 @@
             common: 'common.mp3.mp3',
             rare: 'rare.mp3.mp3',
             epic: 'epic.mp3.mp3',
+            legendary: 'legendary.mp3.mp3',
             mythic: 'mythic.mp3.mp3'
         };
 
@@ -165,7 +166,6 @@
             const rand = Math.random() * 100;
             let rarity;
 
-            // ТВОИ ОРИГИНАЛЬНЫЕ ШАНСЫ ПО СТАДИЯМ
             if (teamSize < 3) rarity = rand < 20 ? "common" : rand < 45 ? "rare" : rand < 70 ? "epic" : rand < 92 ? "legendary" : "mythic";
             else if (teamSize < 6) rarity = rand < 50 ? "common" : rand < 75 ? "rare" : rand < 93 ? "epic" : rand < 98 ? "legendary" : "mythic";
             else rarity = rand < 80 ? "common" : rand < 92 ? "rare" : rand < 97 ? "epic" : rand < 99.5 ? "legendary" : "mythic";
@@ -173,7 +173,6 @@
             playSound(rarity);
 
             const available = POOL.filter(h => h.rarity === rarity);
-            // ТВОИ ШАНСЫ НА НЕРФ
             let nerfChance = teamSize < 3 ? 0.15 : teamSize < 6 ? 0.40 : 0.65;
             
             const nerfs = available.filter(h => h.mult < 1);
