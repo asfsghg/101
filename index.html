@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Friends Clicker: Fixed & Working</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <style>
         body { 
             font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; 
@@ -90,6 +93,13 @@
     <div class="inventory" id="inventory"></div>
 
     <script>
+        // --- СИСТЕМА ОБНОВЛЕНИЯ ---
+        const GAME_VERSION = "1.2"; 
+        if (localStorage.getItem('fcu_version') !== GAME_VERSION) {
+            localStorage.setItem('fcu_version', GAME_VERSION);
+            location.reload(true); // Принудительно обновляем страницу при смене версии
+        }
+
         let coins = parseFloat(localStorage.getItem('fcu_evo_v2_coins')) || 0;
         let characters = JSON.parse(localStorage.getItem('fcu_evo_v2_chars')) || [];
         let multiplier = 1.0;
@@ -182,7 +192,7 @@
                 hero = available[Math.floor(Math.random() * available.length)];
             }
 
-            characters.push({ ...hero, instanceId: Date.now() + Math.random() });
+            characters.push({ ...hero, instanceId: String(Date.now() + Math.random()) });
             calculatePower();
             showLog(`Выпал: ${hero.name}!`);
             save();
@@ -192,7 +202,7 @@
             const price = isNerf ? getFiringPrice() : 0;
             if (coins >= price) {
                 coins -= price;
-                characters = characters.filter(h => h.instanceId !== id);
+                characters = characters.filter(h => h.instanceId !== String(id));
                 calculatePower();
                 updateUI();
                 save();
@@ -207,13 +217,13 @@
                 const isNerf = h.mult < 1;
                 return `
                     <div class="card ${h.rarity}">
-                        <img src="${h.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=FRIEND'">
+                        <img src="${h.img}?v=${GAME_VERSION}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=FRIEND'">
                         <div class="card-info">
                             <div class="card-name">${h.name}</div>
                             <div class="card-mult ${isNerf ? 'negative' : ''}">x${h.mult}</div>
                             <div class="card-desc">${h.desc}</div>
                             <button class="del-btn ${isNerf ? 'del-paid' : 'del-free'}" 
-                                    onclick="removeHero(${h.instanceId}, ${isNerf})">
+                                    onclick="removeHero('${h.instanceId}', ${isNerf})">
                                 ${isNerf ? `УВОЛИТЬ (${fPrice} 💰)` : 'ВЫГНАТЬ (0 💰)'}
                             </button>
                         </div>
