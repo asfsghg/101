@@ -221,15 +221,24 @@
             renderInv();
         }
 
-        document.getElementById('click-button').onclick = (e) => {
-            if(!currentUser) return;
-            playSound('click');
-            const earn = 1 * multiplier;
-            coins += earn;
-            showFloat(e.clientX, e.clientY, earn.toFixed(1));
-            updateUI();
-            save();
-        };
+     
+document.getElementById('click-button').onpointerdown = (e) => {
+    if(!currentUser) return;
+    
+
+    e.preventDefault(); 
+    
+    playSound('click');
+    const earn = 1 * multiplier;
+    coins += earn;
+
+    const posX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+    const posY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+    
+    showFloat(posX, posY, earn.toFixed(1));
+    updateUI();
+    save();
+};
 
         function buyChest() {
             const price = 50 + (characters.length * 50);
