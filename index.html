@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Friends Clicker: EVO V3.5 + SOUNDS</title>
+    <title>Friends Clicker: EVO V3.6 + DESCRIPTIONS</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; user-select: none; touch-action: manipulation; }
         
@@ -47,15 +47,16 @@
         #log { margin: 10px 0; color: #00ffcc; font-weight: bold; height: 20px; text-transform: uppercase; font-size: 14px; }
 
         .inventory { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; padding-bottom: 50px; }
-        .card { width: 110px; background: #181818; border-radius: 8px; border: 2px solid #333; overflow: hidden; position: relative; font-size: 12px; }
+        .card { width: 120px; background: #181818; border-radius: 8px; border: 2px solid #333; overflow: hidden; position: relative; font-size: 12px; }
         .card-count { position: absolute; top: 3px; right: 3px; background: #f1c40f; color: black; padding: 1px 5px; border-radius: 5px; font-weight: bold; font-size: 10px; z-index: 5; }
-        .card-img { width: 100%; height: 80px; object-fit: cover; background: #222; }
-        .card-info { padding: 5px; text-align: center; }
-        .card-name { font-size: 10px; height: 24px; overflow: hidden; }
-        .card-mult { font-size: 16px; font-weight: bold; color: #00ffcc; }
+        .card-img { width: 100%; height: 90px; object-fit: cover; background: #222; }
+        .card-info { padding: 8px; text-align: center; }
+        .card-name { font-size: 11px; height: 26px; overflow: hidden; font-weight: bold; line-height: 1.1; display: flex; align-items: center; justify-content: center; }
+        .card-mult { font-size: 18px; font-weight: bold; color: #00ffcc; margin: 3px 0; }
+        .card-desc { font-size: 9px; color: #888; height: 24px; overflow: hidden; line-height: 1.1; margin-bottom: 5px; }
         
         .negative { color: #ff4d4d !important; }
-        .del-btn { width: 100%; padding: 5px; border: none; cursor: pointer; font-size: 9px; margin-top: 5px; border-radius: 3px; font-weight: bold; }
+        .del-btn { width: 100%; padding: 6px; border: none; cursor: pointer; font-size: 9px; border-radius: 3px; font-weight: bold; }
         .del-free { background: #34495e; color: white; }
         .del-paid { background: #c0392b; color: white; }
 
@@ -125,7 +126,6 @@
         let characters = [];
         let multiplier = 1.0;
 
-        // ЗВУКИ ВЕРНУЛИСЬ
         const SOUNDS = { 
             click: 'click.mp3.mp3', common: 'common.mp3.mp3', rare: 'rare.mp3.mp3', 
             epic: 'epic.mp3.mp3', legendary: 'legendary.mp3.mp3', mythic: 'mythic.mp3.mp3' 
@@ -136,20 +136,20 @@
         }
 
         const POOL = [
-            { name: "Максим Романенко", rarity: "legendary", mult: 1.5, desc: "Жир", img: "max.png" },
-            { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "НЕРФ", img: "shadow.png" },
-            { name: "Полина Скрипник", rarity: "epic", mult: 1.3, desc: "Топ", img: "polina.png" },
-            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "НЕРФ", img: "karolina.png" },
-            { name: "Рыженко Артём", rarity: "rare", mult: 1.25, desc: "Клик", img: "artyom.png" },
-            { name: "Чумак Мирослав", rarity: "rare", mult: 1.1, desc: "Капитал", img: "miroslav.png" },
-            { name: "Матвей Бруснецов", rarity: "common", mult: 1.2, desc: "Бонус", img: "matvey.png" },
-            { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "НЕРФ", img: "boring.png" },
-            { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "НЕРФ", img: "renat.png" },
-            { name: "Давид Стариченко", rarity: "mythic", mult: 1.6, desc: "Мифик", img: "david.png" },
-            { name: "Назар Кицюк", rarity: "mythic", mult: 1.7, desc: "Мифик", img: "nazar.png" },
-            { name: "Ваня Пироженко", rarity: "legendary", mult: 2.0, desc: "ВАУ", img: "vanya.png" },
-            { name: "Миша Герасименко", rarity: "rare", mult: 1.2, desc: "Обычный", img: "misha.png" },
-            { name: "Арсений Москалець", rarity: "mythic", mult: 1.6, desc: "Пузата", img: "Arseniy.png" }
+            { name: "Максим Романенко", rarity: "legendary", mult: 1.5, desc: "Абсолютный жир!", img: "max.png" },
+            { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "ШАДОУ ГДЕ ПАЧКА?", img: "shadow.png" },
+            { name: "Полина Скрипник", rarity: "epic", mult: 1.3, desc: "Слишком высоко.", img: "polina.png" },
+            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Нерф нормалды?", img: "karolina.png" },
+            { name: "Рыженко Артём", rarity: "rare", mult: 1.25, desc: "Любитель потыкать.", img: "artyom.png" },
+            { name: "Чумак Мирослав", rarity: "rare", mult: 1.1, desc: "Рост капитала.", img: "miroslav.png" },
+            { name: "Матвей Бруснецов", rarity: "common", mult: 1.2, desc: "Просто бонус.", img: "matvey.png" },
+            { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "Чисто для баланса.", img: "boring.png" },
+            { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "Жесткий нерф.", img: "renat.png" },
+            { name: "Давид Стариченко", rarity: "mythic", mult: 1.6, desc: "Старый-Молодой.", img: "david.png" },
+            { name: "Назар Кицюк", rarity: "mythic", mult: 1.7, desc: "Омайгарыбал!", img: "nazar.png" },
+            { name: "Ваня Пироженко", rarity: "legendary", mult: 2.0, desc: "Ваня жирный...", img: "vanya.png" },
+            { name: "Миша Герасименко", rarity: "rare", mult: 1.2, desc: "Просто чел.", img: "misha.png" },
+            { name: "Арсений Москалець", rarity: "mythic", mult: 1.6, desc: "Пузата хата.", img: "Arseniy.png" }
         ];
 
         const CHESTS = [
@@ -219,7 +219,7 @@
         document.getElementById('click-button').onpointerdown = (e) => {
             if(!currentUser) return;
             e.preventDefault(); 
-            playSound('click'); // Звук клика
+            playSound('click');
             const earn = 1 * multiplier;
             coins += earn;
             const posX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
@@ -247,7 +247,7 @@
             else if (rand < luckArray[0] + luckArray[1] + luckArray[2] + luckArray[3]) rarity = "legendary";
             else rarity = "mythic";
 
-            playSound(rarity); // Звук редкости
+            playSound(rarity);
             const available = POOL.filter(h => h.rarity === rarity);
             const hero = available[Math.floor(Math.random() * available.length)];
             
@@ -261,7 +261,7 @@
             const price = isNerf ? Math.max(100, Math.floor(coins * 0.5)) : 0;
             if (coins >= price) {
                 coins -= price;
-                playSound('click'); // Звук удаления
+                playSound('click');
                 characters = characters.filter(h => h.name !== name);
                 calculatePower();
                 updateUI();
@@ -287,6 +287,7 @@
                     <div class="card-info">
                         <div class="card-name">${h.name}</div>
                         <div class="card-mult ${isNerf ? 'negative' : ''}">x${h.mult}</div>
+                        <div class="card-desc">${h.desc}</div>
                         <button class="del-btn ${isNerf ? 'del-paid' : 'del-free'}" onclick="removeAllOfKind('${h.name}', ${isNerf})">
                             ${isNerf ? `УБРАТЬ (${fPrice})` : 'ВЫГНАТЬ'}
                         </button>
