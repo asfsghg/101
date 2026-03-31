@@ -56,7 +56,6 @@
         .del-free { background: #34495e; color: white; }
         .del-paid { background: #c0392b; color: white; }
 
-        /* РЕДКОСТИ */
         .mythic { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.6); animation: mythicPulse 2s infinite; }
         .legendary { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
         .epic { border-color: #9b59b6; }
@@ -94,7 +93,7 @@
     <div class="inventory" id="inventory"></div>
 
     <script>
-        // --- 1. ПУЛ ПЕРСОНАЖЕЙ (ТВОЙ КАТАЛОГ) ---
+        // --- 1. ПУЛ ПЕРСОНАЖЕЙ ---
         const POOL = [
             { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Абсолютный жир! Дает безумный буст.", img: "max.png" },
             { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "Нерф: ШАДОУ ГДЕ ПАЧКА?.", img: "shadow.png" },
@@ -109,17 +108,17 @@
             { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Омайгарыбал бейби", img: "nazar.png" }
         ];
 
-        // --- 2. СИСТЕМА ПРИНУДИТЕЛЬНОГО ОБНОВЛЕНИЯ СТАРЫХ ДАННЫХ ---
-        const GAME_VERSION = "1.3"; // Меняй эту цифру, когда хочешь обновить героев у всех
+        // --- 2. СИСТЕМА ПРИНУДИТЕЛЬНОГО ОБНОВЛЕНИЯ ---
+        const GAME_VERSION = "1.4"; // ПОВЫСИЛИ ВЕРСИЮ ДО 1.4
         const savedVersion = localStorage.getItem('fcu_version');
 
         if (savedVersion !== GAME_VERSION) {
             let currentChars = JSON.parse(localStorage.getItem('fcu_evo_v2_chars')) || [];
             
-            // Проходим по героям игрока и обновляем их из POOL
             let updatedChars = currentChars.map(char => {
                 const freshData = POOL.find(p => p.name === char.name);
                 if (freshData) {
+                    // Перезаписываем все статы из актуального POOL
                     return { ...char, mult: freshData.mult, desc: freshData.desc, rarity: freshData.rarity };
                 }
                 return char;
@@ -127,7 +126,8 @@
 
             localStorage.setItem('fcu_evo_v2_chars', JSON.stringify(updatedChars));
             localStorage.setItem('fcu_version', GAME_VERSION);
-            location.reload(true); // Перезагрузка страницы
+            // Важно: пересчитываем силу перед сохранением
+            location.reload(true); 
         }
 
         // --- 3. ЛОГИКА ИГРЫ ---
@@ -154,7 +154,12 @@
         function getFiringPrice() { return Math.max(150, Math.floor(coins * 0.75)); }
 
         function calculatePower() {
-            multiplier = characters.reduce((acc, h) => acc * h.mult, 1.0);
+            // Исправлено: если персонажей нет, множитель 1.0
+            if (characters.length === 0) {
+                multiplier = 1.0;
+            } else {
+                multiplier = characters.reduce((acc, h) => acc * h.mult, 1.0);
+            }
             if (multiplier < 0.01) multiplier = 0.01;
         }
 
@@ -209,7 +214,6 @@
                 hero = available[Math.floor(Math.random() * available.length)];
             }
 
-            // Генерируем уникальный ID как строку для безопасности
             characters.push({ ...hero, instanceId: String(Date.now() + Math.random()) });
             calculatePower();
             showLog(`Выпал: ${hero.name}!`);
@@ -269,6 +273,7 @@
             localStorage.setItem('fcu_evo_v2_chars', JSON.stringify(characters));
         }
 
+        // Запуск
         calculatePower();
         updateUI();
     </script>
