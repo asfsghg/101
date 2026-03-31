@@ -97,15 +97,15 @@
         const POOL = [
             { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Абсолютный жир! Дает безумный буст.", img: "max.png" },
             { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "Нерф: ШАДОУ ГДЕ ПАЧКА?.", img: "shadow.png" },
-            { name: "Полина Скрипник", rarity: "epic", mult: 5.0, desc: "Высоко.", img: "polina.png" },
+            { name: "Полина Скрипник", rarity: "epic", mult: 5.0, desc: "ВысокоЭ.", img: "polina.png" },
             { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Нерф: блочит по рофлу!", img: "karolina.png" },
             { name: "Рыженко Артём", rarity: "rare", mult: 2.5, desc: "Любитель потыкать.", img: "artyom.png" },
             { name: "Чумак Мирослав", rarity: "rare", mult: 0.4, desc: "Нерф: притормозил.", img: "miroslav.png" },
             { name: "Матвей Бруснецов", rarity: "common", mult: 1.2, desc: "Любитель.", img: "matvey.png" },
-            { name: "Скучный Матвей", rarity: "common", mult: 0.8, desc: "Нерф: сосибака", img: "boring.png" },
+            { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "Нерф: сосибака", img: "boring.png" },
             { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "Нерф: ibnə", img: "renat.png" },
             { name: "Давид Стариченко", rarity: "mythic", mult: 6.0, desc: "Старый-Молодой", img: "david.png" },
-            { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Денег нет, но вы держитесь", img: "nazar.png" }
+            { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Омайгарыбал бейби", img: "nazar.png" }
         ];
 
         const coinEl = document.getElementById('coins');
@@ -243,22 +243,6 @@
 
         calculatePower();
         updateUI();
-    </script>
-</body>
-</html>
-</html>
-                    <b>${hero.name}</b><br>
-                    x${hero.mult}<br>
-                    <small>${hero.desc}</small>
-                `;
-                invDisplay.appendChild(card);
-            });
-        }
-
-        function showLog(msg) {
-            logDisplay.innerText = msg;
-            setTimeout(() => { if(logDisplay.innerText === msg) logDisplay.innerText = ""; }, 3000);
-        }
     </script>
 </body>
 </html>
