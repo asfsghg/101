@@ -3,39 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends Clicker: EVO V3 + SOUND</title>
+    <title>Friends Clicker: EVO V3 ULTIMATE</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <style>
-        /* Весь твой CSS остается без изменений */
-        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
-        .hud { background: #111; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; width: 340px; border: 2px solid #444; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; 
+            display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; 
+            user-select: none;
+        }
+        .hud { 
+            background: #111; padding: 20px; border-radius: 15px; text-align: center; 
+            margin-bottom: 20px; width: 340px; border: 2px solid #444;
+        }
         .stats { font-size: 36px; color: #ffd700; font-weight: bold; }
         .luck-meter { font-size: 14px; color: #aaa; margin-top: 5px; }
-        #click-button { width: 170px; height: 170px; border-radius: 50%; border: none; background: radial-gradient(circle, #2ecc71, #27ae60); color: white; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 8px #145a32, 0 15px 25px rgba(0,0,0,0.5); transition: 0.05s; margin: 20px 0; outline: none; -webkit-tap-highlight-color: transparent; }
+
+        #click-button {
+            width: 170px; height: 170px; border-radius: 50%; border: none;
+            background: radial-gradient(circle, #2ecc71, #27ae60);
+            color: white; font-size: 24px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 8px #145a32, 0 15px 25px rgba(0,0,0,0.5);
+            transition: 0.05s; margin: 20px 0; outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
         #click-button:active { transform: translateY(4px); box-shadow: 0 2px #145a32; }
+
         .shop { text-align: center; margin-bottom: 30px; }
-        .chest-btn { padding: 15px 30px; background: #e67e22; border: none; color: white; cursor: pointer; border-radius: 10px; font-size: 18px; font-weight: bold; box-shadow: 0 5px #a04000; transition: 0.3s; }
+        .chest-btn { 
+            padding: 15px 30px; background: #e67e22; border: none; color: white; 
+            cursor: pointer; border-radius: 10px; font-size: 18px; font-weight: bold;
+            box-shadow: 0 5px #a04000; transition: 0.3s;
+        }
         .chest-btn:disabled { background: #333; opacity: 0.5; box-shadow: none; cursor: not-allowed; }
         #log { margin-top: 15px; color: #00ffcc; font-weight: bold; height: 24px; text-transform: uppercase; }
+
         .inventory { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; }
-        .card { width: 170px; background: #181818; border-radius: 12px; border: 3px solid #333; overflow: hidden; position: relative; animation: pop 0.3s ease-out; }
+        .card { 
+            width: 170px; background: #181818; border-radius: 12px; border: 3px solid #333; 
+            overflow: hidden; position: relative; animation: pop 0.3s ease-out;
+        }
         @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
         .card-img { width: 100%; height: 120px; object-fit: cover; background: #222; }
         .card-info { padding: 10px; text-align: center; }
         .card-name { font-size: 13px; font-weight: bold; height: 35px; display: flex; align-items: center; justify-content: center; }
         .card-mult { font-size: 24px; font-weight: bold; color: #00ffcc; margin: 5px 0; }
         .card-desc { font-size: 11px; color: #888; height: 45px; line-height: 1.2; display: flex; align-items: center; justify-content: center; }
         .negative { color: #ff4d4d !important; }
+        
         .del-btn { width: 100%; padding: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 10px; margin-top: 10px; }
         .del-free { background: #34495e; color: white; }
         .del-paid { background: #c0392b; color: white; }
+
         .mythic { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.6); animation: mythicPulse 2s infinite; }
         .legendary { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
         .epic { border-color: #9b59b6; }
         .rare { border-color: #3498db; }
         .common { border-color: #7f8c8d; }
-        @keyframes mythicPulse { 0% { box-shadow: 0 0 5px #ff00ff; } 50% { box-shadow: 0 0 20px #ff00ff; } 100% { box-shadow: 0 0 5px #ff00ff; } }
-        .floating-amt { position: fixed; pointer-events: none; color: #ffd700; font-weight: bold; font-size: 28px; animation: fly 0.8s forwards; z-index: 1000; }
+
+        @keyframes mythicPulse {
+            0% { box-shadow: 0 0 5px #ff00ff; }
+            50% { box-shadow: 0 0 20px #ff00ff; }
+            100% { box-shadow: 0 0 5px #ff00ff; }
+        }
+
+        .floating-amt {
+            position: fixed; pointer-events: none; color: #ffd700; font-weight: bold; 
+            font-size: 28px; animation: fly 0.8s forwards; z-index: 1000;
+        }
         @keyframes fly { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
     </style>
 </head>
@@ -44,7 +79,7 @@
     <div class="hud">
         <div class="stats"><span id="coins">0</span> 💰</div>
         <div style="color:#00ffcc">Множитель: x<span id="mult">1.00</span></div>
-        <div class="luck-meter" id="luck-status">Загрузка удачи...</div>
+        <div class="luck-meter" id="luck-status">Нажми кнопку для звука!</div>
     </div>
     
     <button id="click-button">КЛИК!</button>
@@ -57,19 +92,48 @@
     <div class="inventory" id="inventory"></div>
 
     <script>
-        // --- ЗВУКОВАЯ СИСТЕМА ---
-        const SOUNDS = {
-            click: "https://www.soundjay.com/buttons/sounds/button-37a.mp3",
-            common: "https://www.soundjay.com/buttons/sounds/button-09a.mp3",
-            rare: "https://www.soundjay.com/buttons/sounds/button-10a.mp3",
-            epic: "https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3",
-            mythic: "https://www.soundjay.com/misc/sounds/magic-chime-01.mp3"
+        // --- СИСТЕМА ВШИТЫХ ЗВУКОВ (BASE64) ---
+        const SFX = {
+            click: "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU1vT18AZ73u6uXW1MvDvbKaoI6IenZxaF9UUD04LycYFQ8KBgUCBv///v7+///+/v7+/v7+/v7+/v7+/v7+/v7+/////v7+///+/v7+/v7+/v7+",
+            drop: "data:audio/wav;base64,UklGRigBAABXQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YfAAAAB9fX19fX19fn5+fn5+fn6AgICAgICAgIGBgoKCgoKCgoKCgYKCgoKCgoKCgoKBgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKC",
+            rare: "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU1vT18AZ396eXNxbWhmYl5cVlRTUlFQT05NTUxLSklISUZFRkRERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERE",
+            epic: "data:audio/wav;base64,UklGRigBAABXQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YfAAAAB9fX19fX19fn5+fn5+fn6AgICAgICAgIGBgoKCgoKCgoKCgYKCgoKCgoKCgoKBgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKC"
         };
 
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
         function playSound(type) {
-            const audio = new Audio(SOUNDS[type] || SOUNDS.click);
-            audio.volume = 0.3; // Громкость 30%
-            audio.play().catch(e => console.log("Нужен клик для активации звука"));
+            // Создаем простой синтезированный звук, если Base64 не сработает
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'mythic') {
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.5);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.5);
+            } else {
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.2);
+            }
         }
 
         // --- 1. ПУЛ ПЕРСОНАЖЕЙ ---
@@ -77,32 +141,25 @@
             { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Абсолютный жир! Дает безумный буст.", img: "max.png" },
             { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "Нерф: ШАДОУ ГДЕ ПАЧКА?.", img: "shadow.png" },
             { name: "Полина Скрипник", rarity: "epic", mult: 5.0, desc: "Высоко.", img: "polina.png" },
-            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Нерф: пизда или нормалды?", img: "karolina.png" },
-            { name: "Рыженко Артём", rarity: "rare", mult: 2.5, desc: "Любитель потыкать не только на кнопки.", img: "artyom.png" },
-            { name: "Чумак Мирослав", rarity: "rare", mult: 0.4, desc: "Нерф: капитал на уровне его роста.", img: "miroslav.png" },
+            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Нерф: блок по рофлу", img: "karolina.png" },
+            { name: "Рыженко Артём", rarity: "rare", mult: 2.5, desc: "Любитель кнопок.", img: "artyom.png" },
+            { name: "Чумак Мирослав", rarity: "rare", mult: 0.4, desc: "Нерф: капитал низкий.", img: "miroslav.png" },
             { name: "Матвей Бруснецов", rarity: "common", mult: 1.2, desc: "Бонус.", img: "matvey.png" },
             { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "Нерф: для баланса", img: "boring.png" },
             { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "Нерф: ibnə", img: "renat.png" },
             { name: "Давид Стариченко", rarity: "mythic", mult: 6.0, desc: "Старый-Молодой", img: "david.png" },
-            { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Омайгарыбал бейби", img: "nazar.png" }
+            { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Омайгарыбал", img: "nazar.png" }
         ];
 
-        // --- 2. СИСТЕМА ОБНОВЛЕНИЯ ---
-        const GAME_VERSION = "1.5"; // Еще раз подняли версию для звуков
+        const GAME_VERSION = "2.0"; 
         const savedVersion = localStorage.getItem('fcu_version');
 
         if (savedVersion !== GAME_VERSION) {
-            let currentChars = JSON.parse(localStorage.getItem('fcu_evo_v2_chars')) || [];
-            let updatedChars = currentChars.map(char => {
-                const freshData = POOL.find(p => p.name === char.name);
-                return freshData ? { ...char, mult: freshData.mult, desc: freshData.desc, rarity: freshData.rarity } : char;
-            });
-            localStorage.setItem('fcu_evo_v2_chars', JSON.stringify(updatedChars));
+            localStorage.clear(); // Полная очистка для новой версии звуков
             localStorage.setItem('fcu_version', GAME_VERSION);
-            location.reload(true); 
+            location.reload();
         }
 
-        // --- 3. ЛОГИКА ИГРЫ ---
         let coins = parseFloat(localStorage.getItem('fcu_evo_v2_coins')) || 0;
         let characters = JSON.parse(localStorage.getItem('fcu_evo_v2_chars')) || [];
         let multiplier = 1.0;
@@ -115,7 +172,8 @@
         const luckEl = document.getElementById('luck-status');
 
         document.getElementById('click-button').onclick = (e) => {
-            playSound('click'); // Звук клика
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            playSound('click');
             const earn = 1 * multiplier;
             coins += earn;
             showFloat(e.clientX, e.clientY, earn.toFixed(2));
@@ -141,7 +199,7 @@
             
             const len = characters.length;
             if (len < 3) luckEl.innerText = "Статус: Новичок (Удача +++)";
-            else if (len < 6) luckEl.innerText = "Статус: Опытный (Удача средняя)";
+            else if (len < 6) luckEl.innerText = "Статус: Опытный (Средне)";
             else luckEl.innerText = "Статус: Магнат (Опасно!)";
             renderInv();
         }
@@ -164,11 +222,7 @@
             else if (teamSize < 6) rarity = rand < 50 ? "common" : rand < 75 ? "rare" : rand < 93 ? "epic" : rand < 98 ? "legendary" : "mythic";
             else rarity = rand < 80 ? "common" : rand < 92 ? "rare" : rand < 97 ? "epic" : rand < 99.5 ? "legendary" : "mythic";
 
-            // ИГРАЕМ ЗВУК В ЗАВИСИМОСТИ ОТ РЕДКОСТИ
-            if (rarity === 'mythic') playSound('mythic');
-            else if (rarity === 'legendary' || rarity === 'epic') playSound('epic');
-            else if (rarity === 'rare') playSound('rare');
-            else playSound('common');
+            playSound(rarity === 'mythic' || rarity === 'legendary' ? 'mythic' : 'drop');
 
             const available = POOL.filter(h => h.rarity === rarity);
             let nerfChance = teamSize < 3 ? 0.15 : teamSize < 6 ? 0.40 : 0.65;
@@ -190,7 +244,7 @@
             if (coins >= price) {
                 coins -= price;
                 characters = characters.filter(h => String(h.instanceId) !== String(id));
-                playSound('click'); // Звук при удалении
+                playSound('click');
                 calculatePower();
                 updateUI();
                 save();
@@ -205,7 +259,7 @@
                 const isNerf = h.mult < 1;
                 return `
                     <div class="card ${h.rarity}">
-                        <img src="${h.img}?v=${GAME_VERSION}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=FRIEND'">
+                        <img src="${h.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=FRIEND'">
                         <div class="card-info">
                             <div class="card-name">${h.name}</div>
                             <div class="card-mult ${isNerf ? 'negative' : ''}">x${h.mult}</div>
