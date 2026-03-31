@@ -3,34 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends Clicker: ORIGINAL LUCK + SOUND</title>
+    <title>Friends Clicker: EVO V3 FULL</title>
     <style>
-        /* Весь твой стиль без изменений */
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; user-select: none; }
         .hud { background: #111; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; width: 340px; border: 2px solid #444; }
         .stats { font-size: 36px; color: #ffd700; font-weight: bold; }
         .luck-meter { font-size: 14px; color: #aaa; margin-top: 5px; }
-        #click-button { width: 170px; height: 170px; border-radius: 50%; border: none; background: radial-gradient(circle, #2ecc71, #27ae60); color: white; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 8px #145a32, 0 15px 25px rgba(0,0,0,0.5); transition: 0.05s; margin: 20px 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        #click-button { 
+            width: 170px; height: 170px; border-radius: 50%; border: none; 
+            background: radial-gradient(circle, #2ecc71, #27ae60); 
+            color: white; font-size: 24px; font-weight: bold; cursor: pointer; 
+            box-shadow: 0 8px #145a32, 0 15px 25px rgba(0,0,0,0.5); 
+            transition: 0.05s; margin: 20px 0; outline: none; 
+            -webkit-tap-highlight-color: transparent; 
+        }
         #click-button:active { transform: translateY(4px); box-shadow: 0 2px #145a32; }
+
         .shop { text-align: center; margin-bottom: 30px; }
         .chest-btn { padding: 15px 30px; background: #e67e22; border: none; color: white; cursor: pointer; border-radius: 10px; font-size: 18px; font-weight: bold; box-shadow: 0 5px #a04000; transition: 0.3s; }
         .chest-btn:disabled { background: #333; opacity: 0.5; box-shadow: none; cursor: not-allowed; }
+        
         #log { margin-top: 15px; color: #00ffcc; font-weight: bold; height: 24px; text-transform: uppercase; }
+
         .inventory { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; }
         .card { width: 170px; background: #181818; border-radius: 12px; border: 3px solid #333; overflow: hidden; position: relative; animation: pop 0.3s ease-out; }
         @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
         .card-img { width: 100%; height: 120px; object-fit: cover; background: #222; }
         .card-info { padding: 10px; text-align: center; }
         .card-name { font-size: 13px; font-weight: bold; height: 35px; display: flex; align-items: center; justify-content: center; }
         .card-mult { font-size: 24px; font-weight: bold; color: #00ffcc; margin: 5px 0; }
         .card-desc { font-size: 11px; color: #888; height: 45px; line-height: 1.2; display: flex; align-items: center; justify-content: center; }
+        
         .negative { color: #ff4d4d !important; }
         .del-btn { width: 100%; padding: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 10px; margin-top: 10px; }
         .del-free { background: #34495e; color: white; }
         .del-paid { background: #c0392b; color: white; }
+
+        /* Раритетность */
         .mythic { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.6); animation: mythicPulse 2s infinite; }
-        .legendary { border-color: #f1c40f; }
+        .legendary { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
+        .epic { border-color: #9b59b6; }
+        .rare { border-color: #3498db; }
+        .common { border-color: #7f8c8d; }
+        
         @keyframes mythicPulse { 0% { box-shadow: 0 0 5px #ff00ff; } 50% { box-shadow: 0 0 20px #ff00ff; } 100% { box-shadow: 0 0 5px #ff00ff; } }
+        
         .floating-amt { position: fixed; pointer-events: none; color: #ffd700; font-weight: bold; font-size: 28px; animation: fly 0.8s forwards; z-index: 1000; }
         @keyframes fly { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
     </style>
@@ -54,35 +73,46 @@
 
     <script>
         // --- 1. ЗВУКИ (ЛОКАЛЬНЫЕ) ---
-        const SOUND_FILES = {
-            click: 'click.mp3', common: 'common.mp3', rare: 'rare.mp3', epic: 'epic.mp3', mythic: 'mythic.mp3'
+        const SOUNDS = {
+            click: 'click.mp3.mp3',
+            common: 'common.mp3.mp3',
+            rare: 'rare.mp3.mp3',
+            epic: 'epic.mp3.mp3',
+            mythic: 'mythic.mp3.mp3'
         };
 
         function playSound(type) {
-            const audio = new Audio(SOUND_FILES[type] || SOUND_FILES.click);
+            const audio = new Audio(SOUNDS[type] || SOUNDS.click);
             audio.volume = 0.3;
-            audio.play().catch(() => {});
+            audio.play().catch(e => console.log("Нужен клик для активации звука"));
         }
 
-        // --- 2. ПУЛ ПЕРСОНАЖЕЙ ---
+        // --- 2. ПОЛНЫЙ ПУЛ ПЕРСОНАЖЕЙ (ВСЕ ТВОИ ОПИСАНИЯ) ---
         const POOL = [
-            { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Абсолютный жир!", img: "max.png" },
-            { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "ШАДОУ ГДЕ ПАЧКА?", img: "shadow.png" },
+            { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Абсолютный жир! Дает безумный буст.", img: "max.png" },
+            { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "Нерф: ШАДОУ ГДЕ ПАЧКА?.", img: "shadow.png" },
             { name: "Полина Скрипник", rarity: "epic", mult: 5.0, desc: "Высоко.", img: "polina.png" },
-            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Нерф.", img: "karolina.png" },
-            { name: "Рыженко Артём", rarity: "rare", mult: 2.5, desc: "Любитель кнопок.", img: "artyom.png" },
-            { name: "Чумак Мирослав", rarity: "rare", mult: 0.4, desc: "Нерф.", img: "miroslav.png" },
+            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Нерф: пизда или нормалды?", img: "karolina.png" },
+            { name: "Рыженко Артём", rarity: "rare", mult: 2.5, desc: "Любитель потыкать не только на кнопки.", img: "artyom.png" },
+            { name: "Чумак Мирослав", rarity: "rare", mult: 0.4, desc: "Нерф: капитал на уровне его роста.", img: "miroslav.png" },
             { name: "Матвей Бруснецов", rarity: "common", mult: 1.2, desc: "Бонус.", img: "matvey.png" },
-            { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "Нерф.", img: "boring.png" },
-            { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "ibnə", img: "renat.png" },
+            { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "Нерф: для баланса", img: "boring.png" },
+            { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "Нерф: ibnə", img: "renat.png" },
             { name: "Давид Стариченко", rarity: "mythic", mult: 6.0, desc: "Старый-Молодой", img: "david.png" },
-            { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Омайгад", img: "nazar.png" }
+            { name: "Назар Кицюк", rarity: "mythic", mult: 7.0, desc: "Омайгарыбал бейби", img: "nazar.png" }
         ];
 
         // --- 3. ДАННЫЕ И СОХРАНЕНИЯ ---
         let coins = parseFloat(localStorage.getItem('fcu_evo_v2_coins')) || 0;
         let characters = JSON.parse(localStorage.getItem('fcu_evo_v2_chars')) || [];
         let multiplier = 1.0;
+
+        const coinEl = document.getElementById('coins');
+        const multEl = document.getElementById('mult');
+        const invEl = document.getElementById('inventory');
+        const logEl = document.getElementById('log');
+        const chestBtn = document.getElementById('chest-btn');
+        const luckEl = document.getElementById('luck-status');
 
         function save() {
             localStorage.setItem('fcu_evo_v2_coins', coins);
@@ -97,22 +127,29 @@
         }
 
         function updateUI() {
-            document.getElementById('coins').innerText = Math.floor(coins);
-            document.getElementById('mult').innerText = multiplier.toFixed(2);
+            coinEl.innerText = Math.floor(coins);
+            multEl.innerText = multiplier.toFixed(2);
             
             const price = 50 + (characters.length * 50);
-            const cb = document.getElementById('chest-btn');
-            cb.innerText = `КУПИТЬ СУНДУК (${price} 💰)`;
-            cb.disabled = coins < price;
+            chestBtn.innerText = `КУПИТЬ СУНДУК (${price} 💰)`;
+            chestBtn.disabled = coins < price;
 
             const len = characters.length;
-            const luckEl = document.getElementById('luck-status');
             if (len < 3) luckEl.innerText = "Статус: Новичок (Удача +++)";
             else if (len < 6) luckEl.innerText = "Статус: Опытный (Удача средняя)";
             else luckEl.innerText = "Статус: Магнат (Опасно!)";
 
             renderInv();
         }
+
+        document.getElementById('click-button').onclick = (e) => {
+            playSound('click');
+            const earn = 1 * multiplier;
+            coins += earn;
+            showFloat(e.clientX, e.clientY, earn.toFixed(2));
+            updateUI();
+            save();
+        };
 
         function buyChest() {
             const price = 50 + (characters.length * 50);
@@ -128,7 +165,7 @@
             const rand = Math.random() * 100;
             let rarity;
 
-            // ВОССТАНОВЛЕННЫЕ ШАНСЫ (Твой оригинал)
+            // ТВОИ ОРИГИНАЛЬНЫЕ ШАНСЫ ПО СТАДИЯМ
             if (teamSize < 3) rarity = rand < 20 ? "common" : rand < 45 ? "rare" : rand < 70 ? "epic" : rand < 92 ? "legendary" : "mythic";
             else if (teamSize < 6) rarity = rand < 50 ? "common" : rand < 75 ? "rare" : rand < 93 ? "epic" : rand < 98 ? "legendary" : "mythic";
             else rarity = rand < 80 ? "common" : rand < 92 ? "rare" : rand < 97 ? "epic" : rand < 99.5 ? "legendary" : "mythic";
@@ -136,7 +173,7 @@
             playSound(rarity);
 
             const available = POOL.filter(h => h.rarity === rarity);
-            // Шанс на нерф (Твой оригинал)
+            // ТВОИ ШАНСЫ НА НЕРФ
             let nerfChance = teamSize < 3 ? 0.15 : teamSize < 6 ? 0.40 : 0.65;
             
             const nerfs = available.filter(h => h.mult < 1);
@@ -171,7 +208,7 @@
 
         function renderInv() {
             const fPrice = Math.max(150, Math.floor(coins * 0.75));
-            document.getElementById('inventory').innerHTML = characters.map(h => {
+            invEl.innerHTML = characters.map(h => {
                 const isNerf = h.mult < 1;
                 return `
                 <div class="card ${h.rarity}">
@@ -188,20 +225,13 @@
             }).join('');
         }
 
-        document.getElementById('click-button').onclick = (e) => {
-            playSound('click');
-            const earn = 1 * multiplier;
-            coins += earn;
-            showFloat(e.clientX, e.clientY, earn.toFixed(2));
-            updateUI();
-            save();
-        };
-
-        function showLog(m) { document.getElementById('log').innerText = m; setTimeout(() => { document.getElementById('log').innerText = "ПОГНАЛИ!"; }, 3000); }
+        function showLog(m) { logEl.innerText = m; setTimeout(() => { if(logEl.innerText === m) logEl.innerText = "ПОГНАЛИ!"; }, 3000); }
         
         function showFloat(x, y, t) {
-            const el = document.createElement('div'); el.className = 'floating-amt'; el.innerText = `+${t}`;
-            el.style.left = x + 'px'; el.style.top = y + 'px'; document.body.appendChild(el);
+            const el = document.createElement('div');
+            el.className = 'floating-amt'; el.innerText = `+${t}`;
+            el.style.left = x + 'px'; el.style.top = y + 'px';
+            document.body.appendChild(el);
             setTimeout(() => el.remove(), 800);
         }
 
