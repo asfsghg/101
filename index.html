@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends Clicker: EVO V3 FULL + ONLINE UI</title>
+    <title>Friends Clicker: ONLINE EDITION</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; user-select: none; }
         
-        /* --- НОВЫЕ СТИЛИ ДЛЯ АККАУНТА И ЛИДЕРБОРДА --- */
-        #user-info { position: fixed; top: 10px; left: 10px; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #444; font-size: 14px; }
-        #leaderboard-btn { position: fixed; top: 10px; right: 10px; background: #f1c40f; color: black; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        /* --- ИНТЕРФЕЙС АККАУНТА --- */
+        #user-info { position: fixed; top: 10px; left: 10px; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #444; font-size: 14px; z-index: 100; }
+        #leaderboard-btn { position: fixed; top: 10px; right: 10px; background: #f1c40f; color: black; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; z-index: 100; }
         
+        /* --- МОДАЛЬНЫЕ ОКНА --- */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 10000; }
         .modal-content { background: #181818; padding: 30px; border-radius: 20px; border: 2px solid #444; text-align: center; width: 300px; }
         .modal input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 8px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; }
@@ -18,10 +19,10 @@
 
         .leaderboard-list { text-align: left; margin-top: 15px; max-height: 300px; overflow-y: auto; }
         .lb-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; }
-        .lb-item.me { color: #f1c40f; font-weight: bold; }
-        /* ------------------------------------------- */
+        .lb-item.me { color: #f1c40f; font-weight: bold; background: rgba(241, 196, 15, 0.1); }
 
-        .hud { background: #111; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; width: 340px; border: 2px solid #444; }
+        /* --- ИГРОВЫЕ ЭЛЕМЕНТЫ --- */
+        .hud { background: #111; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; width: 340px; border: 2px solid #444; margin-top: 50px; }
         .stats { font-size: 36px; color: #ffd700; font-weight: bold; }
         .luck-meter { font-size: 14px; color: #aaa; margin-top: 5px; }
         
@@ -56,6 +57,7 @@
         .del-free { background: #34495e; color: white; }
         .del-paid { background: #c0392b; color: white; }
 
+        /* РЕДКОСТИ */
         .mythic { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.6); animation: mythicPulse 2s infinite; }
         .legendary { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
         .epic { border-color: #9b59b6; }
@@ -73,9 +75,9 @@
     <div id="user-info">Игрок: <span id="user-display">---</span></div>
     <button id="leaderboard-btn" onclick="toggleLeaderboard()">🏆 ЛИДЕРЫ</button>
 
-    <div id="reg-modal" class="modal" style="display: flex;">
+    <div id="reg-modal" class="modal">
         <div class="modal-content">
-            <h2>РЕГИСТРАЦИЯ</h2>
+            <h2>ВХОД В ИГРУ</h2>
             <p>Введи свой никнейм:</p>
             <input type="text" id="nickname-input" placeholder="Твой ник..." maxlength="12">
             <button onclick="register()">ИГРАТЬ</button>
@@ -84,9 +86,8 @@
 
     <div id="lb-modal" class="modal" onclick="toggleLeaderboard()">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h2>ТОП ИГРОКОВ</h2>
-            <div class="leaderboard-list" id="lb-list">
-                </div>
+            <h2>ТОП ИГРОКОВ (ONLINE)</h2>
+            <div class="leaderboard-list" id="lb-list">Загрузка...</div>
             <br>
             <button onclick="toggleLeaderboard()">ЗАКРЫТЬ</button>
         </div>
@@ -107,68 +108,29 @@
 
     <div class="inventory" id="inventory"></div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
-        // --- СИСТЕМА АККАУНТОВ ---
+        // --- КОНФИГУРАЦИЯ FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBrATV-dAgbzWPI-cfpmdpvWtU1rNLpvs",
+            authDomain: "clicker-d5776.firebaseapp.com",
+            projectId: "clicker-d5776",
+            databaseURL: "https://clicker-d5776-default-rtdb.europe-west1.firebasedatabase.app/",
+            storageBucket: "clicker-d5776.firebasestorage.app",
+            messagingSenderId: "244387249021",
+            appId: "1:244387249021:web:d4ca38685bafd73c39ea14"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
         let currentUser = localStorage.getItem('fcu_current_user') || "";
         let coins = 0;
         let characters = [];
         let multiplier = 1.0;
-
-        function register() {
-            const input = document.getElementById('nickname-input').value.trim();
-            if (input.length < 2) return alert("Ник слишком короткий!");
-            currentUser = input;
-            localStorage.setItem('fcu_current_user', currentUser);
-            document.getElementById('reg-modal').style.display = 'none';
-            loadUserData();
-        }
-
-        function loadUserData() {
-            if (!currentUser) return;
-            document.getElementById('user-display').innerText = currentUser;
-            document.getElementById('reg-modal').style.display = 'none';
-            
-            coins = parseFloat(localStorage.getItem(`fcu_coins_${currentUser}`)) || 0;
-            characters = JSON.parse(localStorage.getItem(`fcu_chars_${currentUser}`)) || [];
-            
-            calculatePower();
-            updateUI();
-        }
-
-        function save() {
-            if (!currentUser) return;
-            localStorage.setItem(`fcu_coins_${currentUser}`, coins);
-            localStorage.setItem(`fcu_chars_${currentUser}`, JSON.stringify(characters));
-        }
-
-        function toggleLeaderboard() {
-            const modal = document.getElementById('lb-modal');
-            const isVisible = modal.style.display === 'flex';
-            modal.style.display = isVisible ? 'none' : 'flex';
-            if (!isVisible) updateLeaderboard();
-        }
-
-        function updateLeaderboard() {
-            const lbList = document.getElementById('lb-list');
-            // Фейковые игроки для массовки + ты
-            const fakePlayers = [
-                {name: "Max_Pro", coins: 150000},
-                {name: "Nazar_King", coins: 85000},
-                {name: "Gleb_Evil", coins: 12000},
-                {name: currentUser, coins: Math.floor(coins), me: true}
-            ].sort((a, b) => b.coins - a.coins);
-
-            lbList.innerHTML = fakePlayers.map((p, i) => `
-                <div class="lb-item ${p.me ? 'me' : ''}">
-                    <span>${i+1}. ${p.name}</span>
-                    <span>${p.coins.toLocaleString()} 💰</span>
-                </div>
-            `).join('');
-        }
-
-        // --- ОСТАЛЬНАЯ ЛОГИКА ИЗ ТВОЕГО СКРИПТА ---
-        const SOUNDS = { click: 'click.mp3.mp3', common: 'common.mp3.mp3', rare: 'rare.mp3.mp3', epic: 'epic.mp3.mp3', legendary: 'legendary.mp3.mp3', mythic: 'mythic.mp3.mp3' };
-        function playSound(type) { const audio = new Audio(SOUNDS[type] || SOUNDS.click); audio.volume = 0.3; audio.play().catch(e => {}); }
 
         const POOL = [
             { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Абсолютный жир! Дает безумный буст.", img: "max.png" },
@@ -187,13 +149,69 @@
             { name: "Романенко ГЛЕБ", rarity: "mythic", mult: 0.3, desc: "ру-инет те-бе иг-р-у", img: "romanenkoGleb.png" }
         ];
 
-        const coinEl = document.getElementById('coins');
-        const multEl = document.getElementById('mult');
-        const invEl = document.getElementById('inventory');
-        const logEl = document.getElementById('log');
-        const chestBtn = document.getElementById('chest-btn');
-        const luckEl = document.getElementById('luck-status');
+        // --- ЛОГИКА АККАУНТА ---
+        function register() {
+            const input = document.getElementById('nickname-input').value.trim();
+            if (input.length < 2) return alert("Ник слишком короткий!");
+            currentUser = input;
+            localStorage.setItem('fcu_current_user', currentUser);
+            document.getElementById('reg-modal').style.display = 'none';
+            loadUserData();
+        }
 
+        function loadUserData() {
+            if (!currentUser) return;
+            document.getElementById('user-display').innerText = currentUser;
+            document.getElementById('reg-modal').style.display = 'none';
+            
+            db.ref('players/' + currentUser).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    coins = data.coins || 0;
+                    characters = data.characters || [];
+                }
+                calculatePower();
+                updateUI();
+            });
+        }
+
+        function save() {
+            if (!currentUser) return;
+            db.ref('players/' + currentUser).set({
+                name: currentUser,
+                coins: Math.floor(coins),
+                characters: characters,
+                lastSeen: Date.now()
+            });
+        }
+
+        // --- ЛИДЕРБОРД ---
+        function toggleLeaderboard() {
+            const modal = document.getElementById('lb-modal');
+            const isVisible = modal.style.display === 'flex';
+            modal.style.display = isVisible ? 'none' : 'flex';
+            if (!isVisible) updateLeaderboard();
+        }
+
+        function updateLeaderboard() {
+            const lbList = document.getElementById('lb-list');
+            lbList.innerHTML = "Загрузка данных...";
+
+            db.ref('players').orderByChild('coins').limitToLast(10).once('value', (snapshot) => {
+                let players = [];
+                snapshot.forEach(child => { players.push(child.val()); });
+                players.sort((a, b) => b.coins - a.coins);
+
+                lbList.innerHTML = players.map((p, i) => `
+                    <div class="lb-item ${p.name === currentUser ? 'me' : ''}">
+                        <span>${i+1}. ${p.name}</span>
+                        <span>${Math.floor(p.coins).toLocaleString()} 💰</span>
+                    </div>
+                `).join('');
+            });
+        }
+
+        // --- ГЕЙМПЛЕЙ ---
         function calculatePower() {
             if (characters.length === 0) multiplier = 1.0;
             else multiplier = characters.reduce((acc, h) => acc * h.mult, 1.0);
@@ -201,49 +219,53 @@
         }
 
         function updateUI() {
-            coinEl.innerText = Math.floor(coins);
-            multEl.innerText = multiplier.toFixed(2);
+            document.getElementById('coins').innerText = Math.floor(coins);
+            document.getElementById('mult').innerText = multiplier.toFixed(2);
             const price = 50 + (characters.length * 50);
-            chestBtn.innerText = `КУПИТЬ СУНДУК (${price} 💰)`;
-            chestBtn.disabled = coins < price;
-            const len = characters.length;
-            if (len < 3) luckEl.innerText = "Статус: Новичок (Удача +++)";
-            else if (len < 6) luckEl.innerText = "Статус: Опытный (Удача средняя)";
-            else luckEl.innerText = "Статус: Магнат (Опасно!)";
+            const btn = document.getElementById('chest-btn');
+            btn.innerText = `СУНДУК (${price} 💰)`;
+            btn.disabled = coins < price;
+            
+            const luck = document.getElementById('luck-status');
+            if (characters.length < 3) luck.innerText = "Удача: Высокая (Новичок)";
+            else if (characters.length < 6) luck.innerText = "Удача: Средняя (Игрок)";
+            else luck.innerText = "Удача: Низкая (Магнат)";
+            
             renderInv();
         }
 
         document.getElementById('click-button').onclick = (e) => {
             if(!currentUser) return;
-            playSound('click');
-            const earn = 1 * multiplier;
-            coins += earn;
-            showFloat(e.clientX, e.clientY, earn.toFixed(2));
+            coins += (1 * multiplier);
+            showFloat(e.clientX, e.clientY, (1 * multiplier).toFixed(1));
             updateUI();
             save();
         };
 
         function buyChest() {
             const price = 50 + (characters.length * 50);
-            if (coins >= price) { coins -= price; openChest(); updateUI(); }
+            if (coins >= price) { 
+                coins -= price; 
+                openChest(); 
+                updateUI(); 
+            }
         }
 
         function openChest() {
             const teamSize = characters.length;
             const rand = Math.random() * 100;
             let rarity;
+            
             if (teamSize < 3) rarity = rand < 20 ? "common" : rand < 45 ? "rare" : rand < 70 ? "epic" : rand < 84 ? "legendary" : "mythic";
             else if (teamSize < 6) rarity = rand < 50 ? "common" : rand < 75 ? "rare" : rand < 92 ? "epic" : rand < 95 ? "legendary" : "mythic";
             else rarity = rand < 80 ? "common" : rand < 92 ? "rare" : rand < 97 ? "epic" : rand < 98 ? "legendary" : "mythic";
-            playSound(rarity);
+
             const available = POOL.filter(h => h.rarity === rarity);
-            let nerfChance = teamSize < 3 ? 0.15 : teamSize < 6 ? 0.40 : 0.65;
-            const nerfs = available.filter(h => h.mult < 1);
-            const buffs = available.filter(h => h.mult >= 1);
-            let hero = (nerfs.length > 0 && buffs.length > 0) ? (Math.random() < nerfChance ? nerfs[Math.floor(Math.random() * nerfs.length)] : buffs[Math.floor(Math.random() * buffs.length)]) : available[Math.floor(Math.random() * available.length)];
+            let hero = available[Math.floor(Math.random() * available.length)];
+            
             characters.push({ ...hero, instanceId: Date.now() + Math.random() });
             calculatePower();
-            showLog(`Выпал: ${hero.name}!`);
+            showLog(`ВЫПАЛ: ${hero.name}!`);
             save();
         }
 
@@ -252,7 +274,6 @@
             if (coins >= price) {
                 coins -= price;
                 characters = characters.filter(h => h.instanceId !== id);
-                playSound('click');
                 calculatePower();
                 updateUI();
                 save();
@@ -260,22 +281,31 @@
         }
 
         function renderInv() {
+            const invEl = document.getElementById('inventory');
             const fPrice = Math.max(150, Math.floor(coins * 0.75));
             invEl.innerHTML = characters.map(h => {
                 const isNerf = h.mult < 1;
-                return `<div class="card ${h.rarity}">
+                return `
+                <div class="card ${h.rarity}">
                     <img src="${h.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=FRIEND'">
                     <div class="card-info">
                         <div class="card-name">${h.name}</div>
                         <div class="card-mult ${isNerf ? 'negative' : ''}">x${h.mult}</div>
                         <div class="card-desc">${h.desc}</div>
-                        <button class="del-btn ${isNerf ? 'del-paid' : 'del-free'}" onclick="removeHero(${h.instanceId}, ${isNerf})">${isNerf ? `УВОЛИТЬ (${fPrice} 💰)` : 'ВЫГНАТЬ'}</button>
+                        <button class="del-btn ${isNerf ? 'del-paid' : 'del-free'}" onclick="removeHero(${h.instanceId}, ${isNerf})">
+                            ${isNerf ? `УВОЛИТЬ (${fPrice} 💰)` : 'ВЫГНАТЬ'}
+                        </button>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        function showLog(m) { logEl.innerText = m; setTimeout(() => { if(logEl.innerText === m) logEl.innerText = "ПОГНАЛИ!"; }, 3000); }
+        function showLog(m) { 
+            const l = document.getElementById('log');
+            l.innerText = m; 
+            setTimeout(() => { if(l.innerText === m) l.innerText = "ПОГНАЛИ!"; }, 3000); 
+        }
+
         function showFloat(x, y, t) {
             const el = document.createElement('div');
             el.className = 'floating-amt'; el.innerText = `+${t}`;
@@ -284,9 +314,11 @@
             setTimeout(() => el.remove(), 800);
         }
 
-        // Инициализация
-        if (currentUser) loadUserData();
+        // Старт
+        window.onload = () => {
+            if (currentUser) loadUserData();
+            else document.getElementById('reg-modal').style.display = 'flex';
+        };
     </script>
 </body>
 </html>
-
