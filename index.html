@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends Clicker: EVO V3 FULL + ONLINE UI</title>
+    <title>Friends Clicker: EVO V3 FULL + ONLINE + SOUNDS</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; user-select: none; }
         
-        /* --- НОВЫЕ СТИЛИ ДЛЯ АККАУНТА И ЛИДЕРБОРДА --- */
         #user-info { position: fixed; top: 10px; left: 10px; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #444; font-size: 14px; z-index: 100; }
         #leaderboard-btn { position: fixed; top: 10px; right: 10px; background: #f1c40f; color: black; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; z-index: 100; }
         
@@ -20,7 +19,6 @@
         .lb-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; }
         .lb-item.me { color: #f1c40f; font-weight: bold; background: rgba(241, 196, 15, 0.1); }
 
-        /* --- ОСНОВНОЙ ИНТЕРФЕЙС --- */
         .hud { background: #111; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; width: 340px; border: 2px solid #444; margin-top: 50px; }
         .stats { font-size: 36px; color: #ffd700; font-weight: bold; }
         .luck-meter { font-size: 14px; color: #aaa; margin-top: 5px; }
@@ -110,7 +108,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // --- КОНФИГУРАЦИЯ FIREBASE ---
+        // --- КОНФИГУРАЦИЯ FIREBASE (ТВОИ СЕРВЕРА) ---
         const firebaseConfig = {
             apiKey: "AIzaSyCBrATV-dAgbzWPI-cfpmdpvWtU1rNLpvs",
             authDomain: "clicker-d5776.firebaseapp.com",
@@ -120,17 +118,16 @@
             messagingSenderId: "244387249021",
             appId: "1:244387249021:web:d4ca38685bafd73c39ea14"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- ПЕРЕМЕННЫЕ ---
+        // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
         let currentUser = localStorage.getItem('fcu_current_user') || "";
         let coins = 0;
         let characters = [];
         let multiplier = 1.0;
 
-        // --- ЗВУКИ (ВСЕ ВЕРНУЛ) ---
+        // --- ЗВУКИ (ИЗ ТВОЕГО КОДА) ---
         const SOUNDS = { 
             click: 'click.mp3.mp3', 
             common: 'common.mp3.mp3', 
@@ -146,6 +143,7 @@
             audio.play().catch(e => {}); 
         }
 
+        // --- ПУЛ ПЕРСОНАЖЕЙ ---
         const POOL = [
             { name: "Максим Романенко", rarity: "legendary", mult: 15.0, desc: "Абсолютный жир! Дает безумный буст.", img: "max.png" },
             { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "Нерф: ШАДОУ ГДЕ ПАЧКА?.", img: "shadow.png" },
@@ -163,7 +161,7 @@
             { name: "Романенко ГЛЕБ", rarity: "mythic", mult: 0.3, desc: "ру-инет те-бе иг-р-у", img: "romanenkoGleb.png" }
         ];
 
-        // --- СИСТЕМА АККАУНТОВ ---
+        // --- СИСТЕМА АККАУНТОВ И БАЗЫ ДАННЫХ ---
         function register() {
             const input = document.getElementById('nickname-input').value.trim();
             if (input.length < 2) return alert("Ник слишком короткий!");
@@ -202,7 +200,7 @@
             });
         }
 
-        // --- ЛИДЕРБОРД ---
+        // --- ЛИДЕРБОРД (ONLINE) ---
         function toggleLeaderboard() {
             const modal = document.getElementById('lb-modal');
             const isVisible = modal.style.display === 'flex';
@@ -243,9 +241,10 @@
             btn.innerText = `КУПИТЬ СУНДУК (${price} 💰)`;
             btn.disabled = coins < price;
             
+            const len = characters.length;
             const luck = document.getElementById('luck-status');
-            if (characters.length < 3) luck.innerText = "Статус: Новичок (Удача +++)";
-            else if (characters.length < 6) luck.innerText = "Статус: Опытный (Удача средняя)";
+            if (len < 3) luck.innerText = "Статус: Новичок (Удача +++)";
+            else if (len < 6) luck.innerText = "Статус: Опытный (Удача средняя)";
             else luck.innerText = "Статус: Магнат (Опасно!)";
             
             renderInv();
@@ -253,7 +252,7 @@
 
         document.getElementById('click-button').onclick = (e) => {
             if(!currentUser) return;
-            playSound('click');
+            playSound('click'); // Звук клика
             const earn = 1 * multiplier;
             coins += earn;
             showFloat(e.clientX, e.clientY, earn.toFixed(1));
@@ -279,7 +278,7 @@
             else if (teamSize < 6) rarity = rand < 50 ? "common" : rand < 75 ? "rare" : rand < 92 ? "epic" : rand < 95 ? "legendary" : "mythic";
             else rarity = rand < 80 ? "common" : rand < 92 ? "rare" : rand < 97 ? "epic" : rand < 98 ? "legendary" : "mythic";
 
-            playSound(rarity);
+            playSound(rarity); // Звук редкости
 
             const available = POOL.filter(h => h.rarity === rarity);
             let nerfChance = teamSize < 3 ? 0.15 : teamSize < 6 ? 0.40 : 0.65;
@@ -329,9 +328,9 @@
         }
 
         function showLog(m) { 
-            const l = document.getElementById('log');
-            l.innerText = m; 
-            setTimeout(() => { if(l.innerText === m) l.innerText = "ПОГНАЛИ!"; }, 3000); 
+            const logEl = document.getElementById('log');
+            logEl.innerText = m; 
+            setTimeout(() => { if(logEl.innerText === m) logEl.innerText = "ПОГНАЛИ!"; }, 3000); 
         }
 
         function showFloat(x, y, t) {
