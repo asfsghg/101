@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Friends Clicker: EVO V3.6 + DESCRIPTIONS</title>
+    <title>Friends Clicker: EVO V3.7 + PHONKdary</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; user-select: none; touch-action: manipulation; }
         
@@ -60,6 +60,10 @@
         .del-free { background: #34495e; color: white; }
         .del-paid { background: #c0392b; color: white; }
 
+        /* РЕДКОСТИ */
+        .phonkdary { border-color: #ff003c; box-shadow: 0 0 15px #ff003c; animation: phonk-glow 1s infinite alternate; }
+        @keyframes phonk-glow { from { box-shadow: 0 0 5px #ff003c; } to { box-shadow: 0 0 20px #ff003c; } }
+        
         .mythic { border-color: #ff00ff; }
         .legendary { border-color: #f1c40f; }
         .epic { border-color: #9b59b6; }
@@ -126,9 +130,11 @@
         let characters = [];
         let multiplier = 1.0;
 
+        // PHONK ЗВУК ДОБАВЛЕН
         const SOUNDS = { 
             click: 'click.mp3.mp3', common: 'common.mp3.mp3', rare: 'rare.mp3.mp3', 
-            epic: 'epic.mp3.mp3', legendary: 'legendary.mp3.mp3', mythic: 'mythic.mp3.mp3' 
+            epic: 'epic.mp3.mp3', legendary: 'legendary.mp3.mp3', mythic: 'mythic.mp3.mp3',
+            phonkdary: 'phonk.mp3.mp3'
         };
 
         function playSound(type) { 
@@ -136,29 +142,33 @@
         }
 
         const POOL = [
+            { name: "ГИГА-МАКСИМ", rarity: "phonkdary", mult: 3.5, desc: "ФОНК ВЫШЕ КРЫШИ!", img: "gigamax.png" },
+            { name: "ФОНК-РЫЖЕНКО", rarity: "phonkdary", mult: 3.0, desc: "ДРИФТИТ В КЛИКАХ", img: "phonkartyom.png" },
             { name: "Максим Романенко", rarity: "legendary", mult: 1.5, desc: "Абсолютный жир!", img: "max.png" },
             { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.05, desc: "ШАДОУ ГДЕ ПАЧКА?", img: "shadow.png" },
-            { name: "Полина Скрипник", rarity: "epic", mult: 1.3, desc: "Высоко.", img: "polina.png" },
-            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Пизда или нормалды?", img: "karolina.png" },
-            { name: "Рыженко Артём", rarity: "rare", mult: 1.25, desc: "Любитель потыкать на кого то.", img: "artyom.png" },
-            { name: "Чумак Мирослав", rarity: "rare", mult: 1.1, desc: "Расист.", img: "miroslav.png" },
-            { name: "Матвей Бруснецов", rarity: "common", mult: 1.2, desc: "Да.", img: "matvey.png" },
+            { name: "Полина Скрипник", rarity: "epic", mult: 1.3, desc: "Слишком высоко.", img: "polina.png" },
+            { name: "Павленко Каролина", rarity: "epic", mult: 0.1, desc: "Нерф нормалды?", img: "karolina.png" },
+            { name: "Рыженко Артём", rarity: "rare", mult: 1.25, desc: "Любитель потыкать.", img: "artyom.png" },
+            { name: "Чумак Мирослав", rarity: "rare", mult: 1.1, desc: "Рост капитала.", img: "miroslav.png" },
+            { name: "Матвей Бруснецов", rarity: "common", mult: 1.2, desc: "Просто бонус.", img: "matvey.png" },
             { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "Чисто для баланса.", img: "boring.png" },
-            { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "котакбас две в сырном.", img: "renat.png" },
+            { name: "Ренат Мамедов", rarity: "common", mult: 0.9, desc: "Жесткий нерф.", img: "renat.png" },
             { name: "Давид Стариченко", rarity: "mythic", mult: 1.6, desc: "Старый-Молодой.", img: "david.png" },
-            { name: "Назар Кицюк", rarity: "mythic", mult: 1.7, desc: "Омайгарыбал", img: "nazar.png" },
-            { name: "Ваня Пироженко", rarity: "legendary", mult: 2.0, desc: "Ваня жирный говноед", img: "vanya.png" },
-            { name: "Миша Герасименко", rarity: "rare", mult: 1.2, desc: "Просто даун.", img: "misha.png" },
-            { name: "Арсений Москалець", rarity: "mythic", mult: 1.6, desc: "Пузата хата.", img: "Arseniy.png" }
+            { name: "Назар Кицюк", rarity: "mythic", mult: 1.7, desc: "Омайгарыбал!", img: "nazar.png" },
+            { name: "Ваня Пироженко", rarity: "legendary", mult: 2.0, desc: "Ваня жирный...", img: "vanya.png" },
+            { name: "Миша Герасименко", rarity: "rare", mult: 1.2, desc: "Просто чел.", img: "misha.png" },
+            { name: "Арсений Москалець", rarity: "mythic", mult: 1.6, desc: "Пузата хата.", img: "Arseniy.png" },
+            { name: "Катя Ушакова", rarity: "phonkdary", mult: 1.6, desc: "Королева крутости", img: "katya.png" }
         ];
 
+        // ШАНСЫ ОБНОВЛЕНЫ (добавлен 6-й элемент для PHONKdary)
         const CHESTS = [
-            { id: 'worst', name: 'Ужасный', basePrice: 20, class: 'c-worst', luck: [80, 15, 4, 1, 0] },
-            { id: 'cheap', name: 'Дешевый', basePrice: 60, class: 'c-cheap', luck: [60, 30, 8, 2, 0] },
-            { id: 'mid', name: 'Средний', basePrice: 150, class: 'c-mid', luck: [40, 40, 15, 4, 1] },
-            { id: 'good', name: 'Хороший', basePrice: 500, class: 'c-good', luck: [20, 40, 30, 8, 2] },
-            { id: 'best', name: 'Лучший', basePrice: 2000, class: 'c-best', luck: [5, 20, 40, 25, 10] },
-            { id: 'legend', name: 'Легенда', basePrice: 10000, class: 'c-legend', luck: [0, 5, 20, 45, 30] }
+            { id: 'worst', name: 'Ужасный', basePrice: 20, class: 'c-worst', luck: [80, 15, 4, 0.9, 0.1, 0] },
+            { id: 'cheap', name: 'Дешевый', basePrice: 60, class: 'c-cheap', luck: [60, 30, 8, 1.5, 0.5, 0] },
+            { id: 'mid', name: 'Средний', basePrice: 150, class: 'c-mid', luck: [40, 40, 15, 3.5, 1, 0.5] },
+            { id: 'good', name: 'Хороший', basePrice: 500, class: 'c-good', luck: [20, 40, 30, 7, 2, 1] },
+            { id: 'best', name: 'Лучший', basePrice: 2000, class: 'c-best', luck: [5, 20, 40, 20, 10, 5] },
+            { id: 'legend', name: 'Легенда', basePrice: 10000, class: 'c-legend', luck: [0, 5, 15, 30, 35, 15] }
         ];
 
         function register() {
@@ -245,7 +255,8 @@
             else if (rand < luckArray[0] + luckArray[1]) rarity = "rare";
             else if (rand < luckArray[0] + luckArray[1] + luckArray[2]) rarity = "epic";
             else if (rand < luckArray[0] + luckArray[1] + luckArray[2] + luckArray[3]) rarity = "legendary";
-            else rarity = "mythic";
+            else if (rand < luckArray[0] + luckArray[1] + luckArray[2] + luckArray[3] + luckArray[4]) rarity = "mythic";
+            else rarity = "phonkdary"; // САМАЯ КРУТАЯ
 
             playSound(rarity);
             const available = POOL.filter(h => h.rarity === rarity);
