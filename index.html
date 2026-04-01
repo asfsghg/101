@@ -109,18 +109,26 @@
         let characters = [];
         let multiplier = 1.0;
 
-        // ЗВУКИ ВЕРНУЛИСЬ
+        // ЗВУКИ С ПРАВКОЙ НА ПЕРЕБИТИЕ
         const SOUNDS = { 
             click: 'click.mp3.mp3', common: 'common.mp3.mp3', rare: 'rare.mp3.mp3', 
             epic: 'epic.mp3.mp3', legendary: 'legendary.mp3.mp3', mythic: 'mythic.mp3.mp3',
             phonkdary: 'phonk.mp3.mp3'
         };
 
+        let currentAudio = null; // Здесь храним текущий звук
+
         function playSound(type) { 
-            new Audio(SOUNDS[type] || SOUNDS.click).play().catch(() => {}); 
+            // Если что-то играет — стопаем и сбрасываем
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            
+            currentAudio = new Audio(SOUNDS[type] || SOUNDS.click);
+            currentAudio.play().catch(() => {}); 
         }
 
-        // ПЕРСОНАЖИ И ОПИСАНИЯ ВЕРНУЛИСЬ
         const POOL = [
             { name: "Соволій", rarity: "phonkdary", mult: 5.0, desc: "😎😎😎", img: "sava.png" },
             { name: "Максим Романенко", rarity: "legendary", mult: 2.0, desc: "Абсолютный жир!", img: "max.png" },
@@ -222,7 +230,8 @@
         document.getElementById('click-button').onpointerdown = (e) => {
             if(!currentUser) return;
             e.preventDefault(); 
-            playSound('click');
+            // Клик не перебивает озвучку персов, только играет свой звук
+            new Audio(SOUNDS.click).play().catch(() => {});
             const earn = 1 * multiplier;
             coins += earn;
             const posX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
@@ -251,7 +260,7 @@
             else if (rand < luckArray[0] + luckArray[1] + luckArray[2] + luckArray[3] + luckArray[4]) rarity = "mythic";
             else rarity = "phonkdary";
 
-            playSound(rarity);
+            playSound(rarity); // Вот тут теперь работает сброс старого звука
             const available = POOL.filter(h => h.rarity === rarity);
             const hero = available[Math.floor(Math.random() * available.length)];
             characters.push({ ...hero, instanceId: Date.now() + Math.random() });
@@ -264,7 +273,6 @@
             const price = isNerf ? Math.max(500, Math.floor(coins * 0.2)) : 0;
             if (coins >= price) {
                 coins -= price;
-                playSound('click');
                 characters = characters.filter(h => h.name !== name);
                 calculatePower();
                 updateUI();
