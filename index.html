@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Friends Clicker: EVO V3.7 + PHONKdary</title>
+    <title>Friends Clicker: EVO V3.8 + ABILITIES</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; user-select: none; touch-action: manipulation; }
         #user-info { position: fixed; top: 10px; left: 10px; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #444; font-size: 14px; z-index: 100; }
@@ -22,7 +22,7 @@
         .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 360px; margin-bottom: 20px; }
         .chest-card { background: #1a1a1a; border: 2px solid #333; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; transition: 0.2s; }
         .chest-card button { width: 100%; padding: 8px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 5px; color: white; }
-        .chest-card:disabled { opacity: 0.5; filter: grayscale(1); }
+        .chest-card button:disabled { opacity: 0.5; cursor: default; }
         .chest-title { font-size: 11px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
         .c-worst { border-color: #4d2a00; } .c-worst button { background: #633900; }
         .c-cheap { border-color: #7f8c8d; } .c-cheap button { background: #95a5a6; }
@@ -50,7 +50,7 @@
         .epic { border-color: #9b59b6; }
         .rare { border-color: #3498db; }
         .common { border-color: #7f8c8d; }
-        .floating-amt { position: fixed; pointer-events: none; color: #ffd700; font-weight: bold; font-size: 24px; animation: fly 0.6s forwards; z-index: 1000; }
+        .floating-amt { position: fixed; pointer-events: none; font-weight: bold; font-size: 24px; animation: fly 0.6s forwards; z-index: 1000; }
         @keyframes fly { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
     </style>
 </head>
@@ -77,7 +77,8 @@
 
     <div class="hud">
         <div class="stats"><span id="coins">0</span> 💰</div>
-        <div style="color:#00ffcc">Множитель: x<span id="mult">1.00</span></div>
+        <div style="color:#00ffcc">Сила клика: x<span id="mult">1.00</span></div>
+        <div id="auto-stats" style="font-size: 12px; color: #888;">Авто-добыча: 0/сек</div>
     </div>
     
     <button id="click-button">КЛИК!</button>
@@ -108,44 +109,27 @@
         let coins = 0;
         let characters = [];
         let multiplier = 1.0;
+        let discountRate = 0; // Скидка на сундуки
+        let currentAudio = null;
 
-        // ЗВУКИ С ПРАВКОЙ НА ПЕРЕБИТИЕ
         const SOUNDS = { 
             click: 'click.mp3.mp3', common: 'common.mp3.mp3', rare: 'rare.mp3.mp3', 
             epic: 'epic.mp3.mp3', legendary: 'legendary.mp3.mp3', mythic: 'mythic.mp3.mp3',
             phonkdary: 'phonk.mp3.mp3'
         };
 
-        let currentAudio = null; // Здесь храним текущий звук
-
-        function playSound(type) { 
-            // Если что-то играет — стопаем и сбрасываем
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
-            }
-            
-            currentAudio = new Audio(SOUNDS[type] || SOUNDS.click);
-            currentAudio.play().catch(() => {}); 
-        }
-
         const POOL = [
-            { name: "Соволій", rarity: "phonkdary", mult: 5.0, desc: "😎😎😎", img: "sava.png" },
-            { name: "Максим Романенко", rarity: "legendary", mult: 2.0, desc: "Абсолютный жир!", img: "max.png" },
-            { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.2, desc: "ШАДОУ ГДЕ ПАЧКА?", img: "shadow.png" },
-            { name: "Полина Скрипник", rarity: "epic", mult: 1.5, desc: "высоко.", img: "polina.png" },
-            { name: "Павленко Каролина", rarity: "epic", mult: 0.5, desc: "Пизда или нормалды?", img: "karolina.png" },
-            { name: "Рыженко Артём", rarity: "rare", mult: 1.3, desc: "точе мастер.", img: "artyom.png" },
-            { name: "Чумак Мирослав", rarity: "rare", mult: 1.2, desc: "Диктатор.", img: "miroslav.png" },
-            { name: "Матвей Бруснецов", rarity: "common", mult: 1.1, desc: "бонус.", img: "matvey.png" },
-            { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "Чисто для баланса.", img: "boring.png" },
-            { name: "Ренат Мамедов", rarity: "common", mult: 1.05, desc: "котакбас две в сырном.", img: "renat.png" },
-            { name: "Давид Стариченко", rarity: "mythic", mult: 1.8, desc: "Старый-Молодой.", img: "david.png" },
-            { name: "Назар Кицюк", rarity: "mythic", mult: 1.9, desc: "Омайгарыбал!", img: "nazar.png" },
-            { name: "Ваня Пироженко", rarity: "legendary", mult: 2.5, desc: "Ваня жирный говноед", img: "vanya.png" },
-            { name: "Миша Герасименко", rarity: "rare", mult: 1.25, desc: "Просто даун", img: "misha.png" },
-            { name: "Арсений Москалець", rarity: "mythic", mult: 1.7, desc: "Пузата хата.", img: "Arseniy.png" },
-            { name: "Катя Ушакова", rarity: "phonkdary", mult: 4.0, desc: "Королева крутости", img: "katya.png" }
+            { name: "Соволій", rarity: "phonkdary", mult: 5.0, desc: "Фонк-Мастер: +10 кликов/сек", img: "sava.png", pType: "auto", pVal: 10 },
+            { name: "Максим Романенко", rarity: "legendary", mult: 2.0, desc: "Жирный бонус: +5% к клику", img: "max.png", pType: "percent", pVal: 0.05 },
+            { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.2, desc: "Крадет 1 монету/сек", img: "shadow.png", pType: "auto", pVal: -1 },
+            { name: "Полина Скрипник", rarity: "epic", mult: 1.5, desc: "5% шанс крита x10", img: "polina.png", pType: "crit", pVal: 10 },
+            { name: "Павленко Каролина", rarity: "epic", mult: 0.5, desc: "Не бурмолда: +2 или -2 клика/сек", img: "karolina.png", pType: "chaos", pVal: 2 },
+            { name: "Рыженко Артём", rarity: "rare", mult: 1.3, desc: "Скидка на сундуки 2%", img: "artyom.png", pType: "sale", pVal: 0.02 },
+            { name: "Чумак Мирослав", rarity: "rare", mult: 1.2, desc: "Диктатор: +1 клик/сек", img: "miroslav.png", pType: "auto", pVal: 1 },
+            { name: "Матвей Бруснецов", rarity: "common", mult: 1.1, desc: "Бонус: +0.2 клика/сек", img: "matvey.png", pType: "auto", pVal: 0.2 },
+            { name: "Назар Кицюк", rarity: "mythic", mult: 1.9, desc: "3% шанс найти клад (50 монет)", img: "nazar.png", pType: "find", pVal: 50 },
+            { name: "Ваня Пироженко", rarity: "legendary", mult: 2.5, desc: "Тяжелый: -0.5 клика/сек", img: "vanya.png", pType: "auto", pVal: -0.5 },
+            { name: "Катя Ушакова", rarity: "phonkdary", mult: 4.0, desc: "Тролфейс: Бафф Common карт x2", img: "katya.png", pType: "buff", pVal: 2 }
         ];
 
         const CHESTS = [
@@ -156,6 +140,12 @@
             { id: 'best', name: 'Лучший', basePrice: 10000, class: 'c-best', luck: [5, 15, 30, 25, 20, 5] },
             { id: 'legend', name: 'Легенда', basePrice: 50000, class: 'c-legend', luck: [0, 0, 10, 35, 35, 20] }
         ];
+
+        function playSound(type) { 
+            if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+            currentAudio = new Audio(SOUNDS[type] || SOUNDS.click);
+            currentAudio.play().catch(() => {}); 
+        }
 
         function register() {
             const input = document.getElementById('nickname-input').value.trim();
@@ -190,53 +180,97 @@
 
         function calculatePower() {
             if (characters.length === 0) {
-                multiplier = 1.0;
+                multiplier = 1.0; discountRate = 0;
                 return;
             }
             let base = 1.0;
             let bonus = 0;
             let penaltyMult = 1.0;
+            let commonBuff = 1.0;
+
+            // Сначала ищем глобальные баффы (Катя)
+            characters.forEach(h => { if(h.pType === 'buff') commonBuff = h.pVal; });
 
             characters.forEach(h => {
-                if (h.mult >= 1) {
-                    bonus += (h.mult - 1);
-                } else {
-                    penaltyMult *= h.mult;
-                }
+                let m = h.mult;
+                if (h.rarity === 'common') m *= commonBuff;
+
+                if (m >= 1) bonus += (m - 1);
+                else penaltyMult *= m;
             });
+
             multiplier = (base + bonus) * penaltyMult;
             if (multiplier < 0.01) multiplier = 0.01;
+
+            // Считаем скидку
+            discountRate = characters.filter(h => h.pType === 'sale').reduce((s, h) => s + h.pVal, 0);
+            if (discountRate > 0.8) discountRate = 0.8; // Макс скидка 80%
         }
 
         function updateUI() {
             document.getElementById('coins').innerText = Math.floor(coins).toLocaleString();
             document.getElementById('mult').innerText = multiplier.toFixed(2);
+            
             const shop = document.getElementById('shop-grid');
             shop.innerHTML = CHESTS.map(c => {
-                const currentPrice = Math.floor(c.basePrice * Math.pow(1.16, characters.length));
-                const canAfford = coins >= currentPrice;
+                const rawPrice = Math.floor(c.basePrice * Math.pow(1.16, characters.length));
+                const finalPrice = Math.floor(rawPrice * (1 - discountRate));
+                const canAfford = coins >= finalPrice;
                 return `
                     <div class="chest-card ${c.class}">
                         <div class="chest-title">${c.name}</div>
-                        <button onclick="buyChest('${c.id}', ${currentPrice})" ${canAfford ? '' : 'disabled'}>
-                            ${currentPrice.toLocaleString()} 💰
+                        <button onclick="buyChest('${c.id}', ${finalPrice})" ${canAfford ? '' : 'disabled'}>
+                            ${finalPrice.toLocaleString()} 💰
                         </button>
                     </div>
                 `;
             }).join('');
+
+            // Обновление инфы об автоклике
+            let autoSec = 0;
+            characters.forEach(h => {
+                if(h.pType === 'auto') autoSec += h.pVal;
+            });
+            document.getElementById('auto-stats').innerText = `Авто-добыча: ${(autoSec * multiplier).toFixed(1)}/сек`;
+
             renderInv();
         }
+
+        // Интервал автокликера
+        setInterval(() => {
+            if (!currentUser || characters.length === 0) return;
+            let secIncome = 0;
+            characters.forEach(h => {
+                if (h.pType === 'auto') secIncome += h.pVal;
+                if (h.pType === 'chaos') secIncome += (Math.random() > 0.5 ? h.pVal : -h.pVal);
+            });
+            
+            if (secIncome !== 0) {
+                coins += (secIncome * multiplier);
+                if (coins < 0) coins = 0;
+                updateUI();
+            }
+        }, 1000);
 
         document.getElementById('click-button').onpointerdown = (e) => {
             if(!currentUser) return;
             e.preventDefault(); 
-            // Клик не перебивает озвучку персов, только играет свой звук
             new Audio(SOUNDS.click).play().catch(() => {});
-            const earn = 1 * multiplier;
+            
+            let clickMult = multiplier;
+            let isCrit = false;
+
+            // Проверка способностей при клике
+            characters.forEach(h => {
+                if (h.pType === 'crit' && Math.random() < 0.05) { clickMult *= h.pVal; isCrit = true; }
+                if (h.pType === 'find' && Math.random() < 0.03) { coins += h.pVal; showLog("КЛАД! +"+h.pVal); }
+            });
+
+            const earn = 1 * clickMult;
             coins += earn;
             const posX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
             const posY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-            showFloat(posX, posY, earn.toFixed(1));
+            showFloat(posX, posY, earn.toFixed(1), isCrit);
             updateUI();
             save();
         };
@@ -260,7 +294,7 @@
             else if (rand < luckArray[0] + luckArray[1] + luckArray[2] + luckArray[3] + luckArray[4]) rarity = "mythic";
             else rarity = "phonkdary";
 
-            playSound(rarity); // Вот тут теперь работает сброс старого звука
+            playSound(rarity);
             const available = POOL.filter(h => h.rarity === rarity);
             const hero = available[Math.floor(Math.random() * available.length)];
             characters.push({ ...hero, instanceId: Date.now() + Math.random() });
@@ -331,9 +365,14 @@
             setTimeout(() => { if(logEl.innerText === m) logEl.innerText = "УДАЧНОЙ ОХОТЫ!"; }, 2000);
         }
 
-        function showFloat(x,y,t) {
-            const e = document.createElement('div'); e.className = 'floating-amt'; e.innerText = `+${t}`;
-            e.style.left = x+'px'; e.style.top = y+'px'; document.body.appendChild(e);
+        function showFloat(x,y,t, crit) {
+            const e = document.createElement('div'); 
+            e.className = 'floating-amt'; 
+            e.innerText = crit ? `CRIT +${t}` : `+${t}`;
+            e.style.left = x+'px'; e.style.top = y+'px';
+            e.style.color = crit ? "#ff003c" : "#ffd700";
+            if(crit) e.style.fontSize = "32px";
+            document.body.appendChild(e);
             setTimeout(() => e.remove(), 600);
         }
 
