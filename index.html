@@ -118,19 +118,24 @@
             phonkdary: 'phonk.mp3.mp3'
         };
 
-        const POOL = [
-            { name: "Соволій", rarity: "phonkdary", mult: 5.0, desc: "Фонк-Мастер: +10 кликов/сек", img: "sava.png", pType: "auto", pVal: 10 },
-            { name: "Максим Романенко", rarity: "legendary", mult: 2.0, desc: "Жирный бонус: +5% к клику", img: "max.png", pType: "percent", pVal: 0.05 },
-            { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.2, desc: "Крадет 1 монету/сек", img: "shadow.png", pType: "auto", pVal: -1 },
-            { name: "Полина Скрипник", rarity: "epic", mult: 1.5, desc: "5% шанс крита x10", img: "polina.png", pType: "crit", pVal: 10 },
-            { name: "Павленко Каролина", rarity: "epic", mult: 0.5, desc: "Не бурмолда: +2 или -2 клика/сек", img: "karolina.png", pType: "chaos", pVal: 2 },
-            { name: "Рыженко Артём", rarity: "rare", mult: 1.3, desc: "Скидка на сундуки 2%", img: "artyom.png", pType: "sale", pVal: 0.02 },
-            { name: "Чумак Мирослав", rarity: "rare", mult: 1.2, desc: "Диктатор: +1 клик/сек", img: "miroslav.png", pType: "auto", pVal: 1 },
-            { name: "Матвей Бруснецов", rarity: "common", mult: 1.1, desc: "Бонус: +0.2 клика/сек", img: "matvey.png", pType: "auto", pVal: 0.2 },
-            { name: "Назар Кицюк", rarity: "mythic", mult: 1.9, desc: "3% шанс найти клад (50 монет)", img: "nazar.png", pType: "find", pVal: 50 },
-            { name: "Ваня Пироженко", rarity: "legendary", mult: 2.5, desc: "Тяжелый: -0.5 клика/сек", img: "vanya.png", pType: "auto", pVal: -0.5 },
-            { name: "Катя Ушакова", rarity: "phonkdary", mult: 4.0, desc: "Тролфейс: Бафф Common карт x2", img: "katya.png", pType: "buff", pVal: 2 }
-        ];
+       const POOL = [
+    { name: "Соволій", rarity: "phonkdary", mult: 5.0, desc: "😎😎😎", img: "sava.png", pType: "auto", pVal: 10 },
+    { name: "Максим Романенко", rarity: "legendary", mult: 2.0, desc: "Абсолютный жир!", img: "max.png", pType: "percent", pVal: 0.05 },
+    { name: "ТЕНЬ МАКСИМА", rarity: "legendary", mult: 0.2, desc: "ШАДОУ ГДЕ ПАЧКА?", img: "shadow.png", pType: "auto", pVal: -1 },
+    { name: "Полина Скрипник", rarity: "epic", mult: 1.5, desc: "высоко.", img: "polina.png", pType: "crit", pVal: 10 },
+    { name: "Павленко Каролина", rarity: "epic", mult: 0.5, desc: "Пизда или нормалды?", img: "karolina.png", pType: "chaos", pVal: 2 },
+    { name: "Рыженко Артём", rarity: "rare", mult: 1.3, desc: "точе мастер.", img: "artyom.png", pType: "sale", pVal: 0.02 },
+    { name: "Чумак Мирослав", rarity: "rare", mult: 1.2, desc: "Диктатор.", img: "miroslav.png", pType: "auto", pVal: 1 },
+    { name: "Матвей Бруснецов", rarity: "common", mult: 1.1, desc: "бонус.", img: "matvey.png", pType: "auto", pVal: 0.2 },
+    { name: "Негатив Матвей", rarity: "common", mult: 0.8, desc: "Чисто для баланса.", img: "boring.png", pType: "auto", pVal: -0.1 },
+    { name: "Ренат Мамедов", rarity: "common", mult: 1.05, desc: "котакбас две в сырном.", img: "renat.png", pType: "auto", pVal: 0.1 },
+    { name: "Давид Стариченко", rarity: "mythic", mult: 1.8, desc: "Старый-Молодой.", img: "david.png", pType: "find", pVal: 40 },
+    { name: "Назар Кицюк", rarity: "mythic", mult: 1.9, desc: "Омайгарыбал!", img: "nazar.png", pType: "find", pVal: 50 },
+    { name: "Ваня Пироженко", rarity: "legendary", mult: 2.5, desc: "Ваня жирный говноед", img: "vanya.png", pType: "auto", pVal: -0.5 },
+    { name: "Миша Герасименко", rarity: "rare", mult: 1.25, desc: "Просто даун", img: "misha.png", pType: "auto", pVal: 0.5 },
+    { name: "Арсений Москалець", rarity: "mythic", mult: 1.7, desc: "Пузата хата.", img: "Arseniy.png", pType: "percent", pVal: 0.03 },
+    { name: "Катя Ушакова", rarity: "phonkdary", mult: 4.0, desc: "Королева крутости", img: "katya.png", pType: "buff", pVal: 2 }
+];
 
         const CHESTS = [
             { id: 'worst', name: 'Ужасный', basePrice: 40, class: 'c-worst', luck: [80, 15, 4, 1, 0, 0] },
